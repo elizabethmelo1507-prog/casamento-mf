@@ -1289,7 +1289,7 @@ async function submitRSVP() {
   if (error) {
     console.error(error);
     if (btn) { btn.disabled = false; btn.textContent = 'Confirmar minha presença'; }
-    alert('Erro ao confirmar. Tente novamente.');
+    alert('Erro ao confirmar: ' + (error.message || JSON.stringify(error)));
     return;
   }
 
