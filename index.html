@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maressa &amp; Favila — 01.08.2026</title>
+  <link rel="icon" type="image/png" href="mini logo.png" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --c1: #C0CBD8; --c2: #7A95B8; --c3: #394E6A;
+      --c4: #F2F4F8; --c5: #E8EDF4; --white: #ffffff;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--c4); color: var(--c3); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+    /* ══════════════════════════════
+       INTRO OVERLAY — 3 fases
+    ══════════════════════════════ */
+    #intro {
+      position: fixed; inset: 0; z-index: 9000;
+      background: var(--c3);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 2rem;
+      transition: opacity 1s ease, visibility 1s ease;
+    }
+    #intro.out { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    /* — FASE 1: versículo — */
+    #phase-verse {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: clamp(2rem, 8vw, 6rem);
+      opacity: 0; transition: opacity 0.8s ease;
+      text-align: center;
+    }
+    #phase-verse.active { opacity: 1; }
+
+    .verse-ref {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(0.7rem, 1.5vw, 0.85rem);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--c2);
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+    .verse-ref.show { opacity: 1; }
+
+    .verse-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.3rem, 3.5vw, 2.1rem);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.8;
+      color: rgba(255,255,255,0.88);
+      max-width: 700px;
+      min-height: 3em;
+    }
+    /* cursor piscante */
+    .cursor {
+      display: inline-block;
+      width: 2px; height: 1.1em;
+      background: var(--c2);
+      vertical-align: middle;
+      margin-left: 3px;
+      animation: blink 0.8s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* decorative lines */
+    .intro-deco {
+      display: flex; align-items: center; gap: 1rem;
+      margin-bottom: 2.5rem;
+      opacity: 0; transition: opacity 0.8s ease 0.3s;
+    }
+    .intro-deco.show { opacity: 1; }
+    .intro-deco .dl { width: 50px; height: 1px; background: rgba(255,255,255,0.15); }
+    .intro-deco .dd {
+      width: 5px; height: 5px;
+      border: 1px solid var(--c2);
+      transform: rotate(45deg);
+    }
+
+    /* — FASE 2: bênção — */
+    #phase-blessing {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: clamp(2rem, 8vw, 6rem);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.9s ease;
+      text-align: center;
+    }
+    #phase-blessing.active { opacity: 1; pointer-events: auto; }
+
+    .blessing-tag {
+      font-size: 0.65rem; letter-spacing: 0.25em;
+      text-transform: uppercase; color: var(--c2);
+      margin-bottom: 1.5rem;
+      opacity: 0; transform: translateY(10px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .blessing-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.6rem, 4vw, 2.6rem);
+      font-weight: 300; line-height: 1.4;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 3rem;
+      opacity: 0; transform: translateY(10px);
+      transition: opacity 0.7s ease 0.15s, transform 0.7s ease 0.15s;
+    }
+    .blessing-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center; gap: 1.5rem 3rem;
+      max-width: 620px; width: 100%;
+      opacity: 0; transform: translateY(10px);
+      transition: opacity 0.7s ease 0.3s, transform 0.7s ease 0.3s;
+    }
+    .blessing-sep { width: 1px; height: 80px; background: rgba(255,255,255,0.12); margin: 0 auto; }
+    .blessing-family { text-align: center; }
+    .blessing-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(0.95rem, 2vw, 1.15rem);
+      font-weight: 400; line-height: 1.9;
+      color: rgba(255,255,255,0.75);
+    }
+    .blessing-and {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-size: 0.9rem;
+      color: var(--c2); display: block; margin: 0.1rem 0;
+    }
+
+    #phase-blessing.active .blessing-tag,
+    #phase-blessing.active .blessing-heading,
+    #phase-blessing.active .blessing-grid {
+      opacity: 1; transform: translateY(0);
+    }
+
+    @media (max-width: 520px) {
+      .blessing-grid { grid-template-columns: 1fr; }
+      .blessing-sep { width: 50px; height: 1px; background: rgba(255,255,255,0.12); }
+    }
+
+    /* skip */
+    #skip-btn {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 9100;
+      background: transparent; border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.45);
+      font-family: 'Inter', sans-serif; font-size: 0.65rem;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      padding: 0.5rem 1.2rem; cursor: pointer; border-radius: 2px;
+      transition: color 0.2s, border-color 0.2s;
+      opacity: 0; animation: fadeIn 0.5s ease forwards 1.2s;
+    }
+    #skip-btn:hover { color: rgba(255,255,255,0.85); border-color: rgba(255,255,255,0.4); }
+    @keyframes fadeIn { to { opacity: 1; } }
+
+    /* ══════════════════════════════
+       MAIN
+    ══════════════════════════════ */
+    #main { opacity: 0; transition: opacity 0.9s ease; }
+    #main.visible { opacity: 1; }
+
+    /* ── NAV ── */
+    #navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+      padding: 0 clamp(1.5rem, 5vw, 4rem); height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: background 0.4s, box-shadow 0.4s;
+    }
+    #navbar.scrolled {
+      background: rgba(255,255,255,0.93);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 1px 0 rgba(57,78,106,0.07);
+    }
+    .nav-logo { width: 34px; opacity: 0.8; transition: opacity 0.2s; }
+    .nav-logo:hover { opacity: 1; }
+    .nav-links { display: flex; gap: clamp(1.2rem, 3vw, 2.5rem); list-style: none; }
+    .nav-links a {
+      font-size: 0.67rem; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--c3); text-decoration: none; opacity: 0.55; transition: opacity 0.2s;
+    }
+    .nav-links a:hover { opacity: 1; }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100svh; display: grid; place-items: center;
+      text-align: center; padding: 8rem 2rem 5rem;
+      background: var(--c4); position: relative; overflow: hidden;
+    }
+    #hero::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 90% 60% at 50% 0%, rgba(192,203,216,0.35) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 50% at 90% 100%, rgba(122,149,184,0.12) 0%, transparent 60%);
+    }
+    .hero-inner { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 0; }
+    .hero-monogram {
+      width: min(280px, 60vw);
+      mix-blend-mode: multiply;
+      opacity: 0.9;
+      margin-bottom: 2.8rem;
+    }
+    .hero-names {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.6rem, 7.5vw, 5.2rem);
+      font-weight: 400; font-style: italic;
+      color: var(--c3);
+      letter-spacing: 0.01em;
+      line-height: 1;
+      margin-bottom: 1.4rem;
+    }
+    .hero-names .amp {
+      font-size: 0.6em; color: var(--c2); font-style: normal;
+      margin: 0 0.3em;
+    }
+    .hero-date {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(0.62rem, 1.5vw, 0.72rem);
+      letter-spacing: 0.5em; text-transform: uppercase;
+      color: var(--c2); opacity: 0.7;
+      margin-bottom: 2rem;
+    }
+    .hero-divider { display: flex; align-items: center; justify-content: center; gap: 1rem; }
+    .hero-divider .hl { width: 50px; height: 1px; background: var(--c1); }
+    .hero-divider .hd { width: 4px; height: 4px; background: var(--c2); transform: rotate(45deg); opacity: 0.5; }
+    .hero-scroll {
+      position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+      opacity: 0.35; animation: bounce 2.4s ease-in-out infinite; cursor: default;
+    }
+    .hero-scroll span { font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--c2); }
+    @keyframes bounce {
+      0%,100% { opacity: 0.35; transform: translateX(-50%) translateY(0); }
+      50% { opacity: 0.6; transform: translateX(-50%) translateY(5px); }
+    }
+
+    /* ══ SECTION BASE ══ */
+    .section { padding: clamp(5rem, 11vw, 8rem) clamp(1.5rem, 6vw, 5rem); }
+    .section-inner { max-width: 860px; margin: 0 auto; }
+    .section-tag { font-size: 0.63rem; letter-spacing: 0.26em; text-transform: uppercase; color: var(--c2); display: block; margin-bottom: 0.9rem; }
+    .section-heading { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.1rem, 5vw, 3rem); font-weight: 400; line-height: 1.2; }
+    .ornament { display: flex; align-items: center; gap: 1rem; margin: 1.8rem 0; color: var(--c3); }
+    .ornament .ol { flex: 1; height: 1px; background: currentColor; opacity: 0.12; }
+    .ornament .os { opacity: 0.35; flex-shrink: 0; }
+
+    /* reveal */
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.75s ease, transform 0.75s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+    .d1 { transition-delay: 0.1s; } .d2 { transition-delay: 0.2s; } .d3 { transition-delay: 0.3s; } .d4 { transition-delay: 0.4s; }
+
+    /* ── VERSÍCULO (seção da página) ── */
+    #versiculo { background: var(--c3); color: var(--white); text-align: center; }
+    #versiculo .section-tag { color: rgba(255,255,255,0.38); }
+    #versiculo .ornament .ol { background: rgba(255,255,255,0.15); opacity: 1; }
+    #versiculo blockquote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.35rem, 3.2vw, 2rem); font-weight: 300; font-style: italic;
+      line-height: 1.8; max-width: 700px; margin: 0 auto 1.5rem;
+      color: rgba(255,255,255,0.88);
+    }
+    #versiculo .qdeco { font-family: 'Cormorant Garamond', serif; font-size: 7rem; line-height: 0.8; color: rgba(255,255,255,0.04); display: block; margin-bottom: -1.5rem; user-select: none; }
+    #versiculo cite { font-family: 'Inter', sans-serif; font-size: 0.68rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--c2); font-style: normal; }
+
+    /* ── EVENTO ── */
+    #evento { background: var(--c4); text-align: center; }
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)); gap: 1rem; margin-top: 3rem; }
+    .card {
+      background: var(--white); border: 1px solid rgba(192,203,216,0.55);
+      padding: 2.2rem 1.5rem 2rem; text-align: center;
+      transition: box-shadow 0.3s, transform 0.3s;
+    }
+    .card:hover { box-shadow: 0 6px 28px rgba(57,78,106,0.07); transform: translateY(-3px); }
+    .card-icon { width: 44px; height: 44px; margin: 0 auto 1.2rem; display: grid; place-items: center; border: 1px solid var(--c1); border-radius: 50%; color: var(--c2); }
+    .card-icon svg { width: 18px; height: 18px; }
+    .card-tag { font-size: 0.58rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--c2); margin-bottom: 0.5rem; }
+    .card-val { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 500; color: var(--c3); line-height: 1.5; }
+    .card-sub { font-size: 0.73rem; color: var(--c2); margin-top: 0.25rem; line-height: 1.5; }
+    .alert-box {
+      max-width: 620px; margin: 2rem auto 0;
+      background: rgba(122,149,184,0.07); border: 1px solid rgba(122,149,184,0.2); border-left: 3px solid var(--c2);
+      padding: 1rem 1.4rem; text-align: left; font-size: 0.82rem; color: var(--c3); line-height: 1.7;
+      display: flex; gap: 0.8rem; align-items: flex-start;
+    }
+    .alert-box svg { flex-shrink: 0; color: var(--c2); margin-top: 2px; }
+    .map-wrapper { margin-top: 3rem; border: 1px solid rgba(192,203,216,0.55); position: relative; overflow: hidden; }
+    .map-label {
+      background: var(--c3); color: rgba(255,255,255,0.7);
+      font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase;
+      padding: 0.65rem 1rem; text-align: left;
+    }
+    .map-wrapper iframe { width: 100%; height: 320px; border: 0; display: block; }
+
+    /* ── COUNTDOWN ── */
+    #countdown { background: var(--c3); color: var(--white); text-align: center; }
+    #countdown .section-tag { color: rgba(255,255,255,0.35); }
+    #countdown .ornament .ol { background: rgba(255,255,255,0.12); opacity: 1; }
+    .countdown-grid { display: flex; justify-content: center; gap: clamp(1.5rem, 5vw, 4rem); margin-top: 2.5rem; flex-wrap: wrap; align-items: flex-start; }
+    .cnt-item { text-align: center; min-width: 65px; }
+    .cnt-num { font-family: 'Cormorant Garamond', serif; font-size: clamp(3rem, 8vw, 5rem); font-weight: 300; line-height: 1; color: var(--white); display: block; }
+    .cnt-lbl { font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-top: 0.4rem; display: block; }
+    .cnt-sep { font-family: 'Cormorant Garamond', serif; font-size: 3.5rem; color: rgba(255,255,255,0.12); padding-top: 0.1rem; }
+
+    /* ── RSVP ── */
+    #rsvp { background: var(--white); text-align: center; }
+    .form-wrapper { max-width: 520px; margin: 3rem auto 0; text-align: left; }
+    .form-field { margin-bottom: 1.5rem; position: relative; }
+    .form-field label { display: block; font-size: 0.63rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--c2); margin-bottom: 0.55rem; }
+    .form-field input {
+      width: 100%; padding: 0.85rem 2.8rem 0.85rem 1rem; border: 1px solid var(--c1);
+      background: var(--c4); color: var(--c3);
+      font-family: 'Inter', sans-serif; font-size: 0.88rem;
+      outline: none; border-radius: 0;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .form-field input::placeholder { color: var(--c1); }
+    .form-field input:focus { border-color: var(--c2); background: var(--white); }
+    /* autocomplete dropdown */
+    .nome-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: var(--white); border: 1px solid var(--c2); border-top: none; z-index: 300; max-height: 240px; overflow-y: auto; box-shadow: 0 8px 24px rgba(57,78,106,0.1); }
+    .dropdown-item { padding: 0.75rem 1rem; cursor: pointer; border-bottom: 1px solid var(--c4); transition: background 0.15s; }
+    .dropdown-item:last-child { border-bottom: none; }
+    .dropdown-item:hover { background: var(--c4); }
+    .di-name { font-size: 0.88rem; color: var(--c3); font-weight: 500; }
+    .di-invite { font-size: 0.7rem; color: var(--c2); margin-top: 0.15rem; }
+    /* check icon inside input */
+    .input-check { position: absolute; right: 1rem; bottom: 0.9rem; color: #27ae60; font-size: 1rem; font-weight: 700; display: none; }
+    .input-check.show { display: block; }
+    /* confirmed banner */
+    .nome-confirmed { display: flex; align-items: flex-start; gap: 0.75rem; background: rgba(39,174,96,0.06); border: 1px solid rgba(39,174,96,0.22); border-left: 3px solid #27ae60; padding: 0.85rem 1rem; margin-top: 0.5rem; }
+    .nome-confirmed .cf-icon { color: #27ae60; font-size: 1.1rem; flex-shrink: 0; margin-top: 0.1rem; }
+    .cf-name { font-size: 0.88rem; font-weight: 500; color: var(--c3); }
+    .cf-invite { font-size: 0.72rem; color: var(--c2); margin-top: 0.15rem; }
+    /* not found */
+    .nome-msg { font-size: 0.75rem; color: #c0392b; margin-top: 0.4rem; display: flex; align-items: center; gap: 0.4rem; }
+    /* companions */
+    .companions-header { margin: 1.8rem 0 1rem; }
+    .companions-header span { font-size: 0.63rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--c2); display: block; margin-bottom: 0.3rem; }
+    .companions-header small { font-size: 0.78rem; color: var(--c2); line-height: 1.5; }
+    .companion-row { display: flex; align-items: center; gap: 0.85rem; padding: 0.85rem 1rem; border: 1px solid var(--c1); background: var(--c4); margin-bottom: 0.5rem; cursor: pointer; transition: border-color 0.2s, background 0.2s; user-select: none; }
+    .companion-row:hover { border-color: var(--c2); background: var(--white); }
+    .companion-row input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--c3); flex-shrink: 0; cursor: pointer; }
+    .companion-row .cr-name { font-size: 0.88rem; color: var(--c3); flex: 1; }
+    .companion-row .cr-note { font-size: 0.7rem; color: var(--c2); }
+    .companion-solo { font-size: 0.82rem; color: var(--c2); padding: 0.5rem 0; }
+    /* submit */
+    .btn-submit { width: 100%; padding: 1rem; background: var(--c3); color: var(--white); border: none; font-family: 'Inter', sans-serif; font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; margin-top: 0.5rem; }
+    .btn-submit:hover { background: #2d3f57; }
+    .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+    /* success */
+    #rsvp-success { display: none; margin-top: 2.5rem; padding: 3rem 2rem; background: var(--c4); border: 1px solid var(--c1); text-align: center; }
+    #rsvp-success .sicon { font-size: 1.5rem; display: block; margin-bottom: 1rem; color: var(--c2); }
+    #rsvp-success p { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-style: italic; color: var(--c3); margin-bottom: 0.4rem; }
+    #rsvp-success small { font-size: 0.76rem; color: var(--c2); }
+    .hidden { display: none !important; }
+
+    /* ── PRESENTES ── */
+    #presentes { background: var(--c4); text-align: center; }
+    #acomodacoes { background: var(--white); text-align: center; }
+    .gift-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.2rem; margin-top: 3rem; text-align: left; }
+    .gift-card { background: var(--white); border: 1px solid rgba(192,203,216,0.45); border-radius: 3px; padding: 1.6rem 1.5rem; display: flex; flex-direction: column; gap: 0.7rem; transition: box-shadow .2s, transform .2s; position: relative; overflow: hidden; }
+    .gift-card:hover { box-shadow: 0 8px 30px rgba(57,78,106,0.09); transform: translateY(-2px); }
+    .gift-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--c1), var(--c2)); }
+    .gift-icon { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--c4); border-radius: 50%; flex-shrink: 0; }
+    .gift-icon svg { stroke: var(--c2); }
+    .gift-name { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; font-weight: 500; color: var(--c3); line-height: 1.3; }
+    .gift-desc { font-size: 0.75rem; color: var(--c2); line-height: 1.6; }
+    .gift-tag { display: inline-block; font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; background: var(--c4); color: var(--c2); padding: 0.2rem 0.6rem; border-radius: 20px; }
+    .gift-footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 0.8rem; border-top: 1px solid rgba(192,203,216,0.35); }
+    .gift-price { font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; font-weight: 500; color: var(--c3); }
+    .gift-price small { font-family: 'Inter', sans-serif; font-size: 0.6rem; color: var(--c2); display: block; letter-spacing: 0.05em; }
+    .gift-btn { background: var(--c3); color: var(--white); border: none; font-family: 'Inter', sans-serif; font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; padding: 0.5rem 1rem; border-radius: 2px; cursor: pointer; transition: background .2s; white-space: nowrap; }
+    .gift-btn:hover { background: var(--c2); }
+
+    /* ── MODAL PRESENTE ── */
+    .gift-modal-bg { position: fixed; inset: 0; background: rgba(30,42,58,0.6); backdrop-filter: blur(4px); z-index: 500; display: none; align-items: center; justify-content: center; padding: 1rem; }
+    .gift-modal-bg.open { display: flex; }
+    .gift-modal { background: var(--white); border-radius: 4px; width: 100%; max-width: 420px; overflow: hidden; box-shadow: 0 24px 60px rgba(30,42,58,0.25); animation: modalIn .25s ease; }
+    @keyframes modalIn { from { opacity:0; transform: translateY(16px) scale(.97); } to { opacity:1; transform: none; } }
+    .gift-modal-head { background: var(--c3); padding: 1.4rem 1.6rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+    .gift-modal-head-info { display: flex; flex-direction: column; gap: 0.2rem; }
+    .gift-modal-head h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 400; color: var(--white); }
+    .gift-modal-head span { font-size: 0.68rem; color: rgba(192,203,216,0.7); }
+    .gift-modal-close { background: none; border: none; color: rgba(255,255,255,0.5); font-size: 1.4rem; cursor: pointer; line-height: 1; padding: 0; transition: color .15s; }
+    .gift-modal-close:hover { color: var(--white); }
+    .gift-modal-tabs { display: flex; border-bottom: 1px solid rgba(192,203,216,0.4); }
+    .gift-modal-tab { flex: 1; padding: 0.85rem; font-family: 'Inter', sans-serif; font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; background: none; border: none; cursor: pointer; color: var(--c2); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .2s, border-color .2s; }
+    .gift-modal-tab.active { color: var(--c3); border-bottom-color: var(--c3); font-weight: 500; }
+    .gift-modal-body { padding: 1.6rem; }
+    .gift-tab-pane { display: none; flex-direction: column; align-items: center; gap: 1rem; text-align: center; }
+    .gift-tab-pane.active { display: flex; }
+    .gift-qr { width: 160px; height: 160px; border: 1px solid rgba(192,203,216,0.5); border-radius: 3px; padding: 6px; }
+    .gift-pix-key { width: 100%; background: var(--c4); border: 1px solid var(--c1); border-radius: 2px; padding: 0.7rem 1rem; font-family: 'Inter', sans-serif; font-size: 0.8rem; color: var(--c3); display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+    .gift-pix-key span { word-break: break-all; text-align: left; }
+    .gift-copy-btn { background: none; border: none; cursor: pointer; color: var(--c2); flex-shrink: 0; transition: color .2s; }
+    .gift-copy-btn:hover { color: var(--c3); }
+    .gift-copy-msg { font-size: 0.7rem; color: var(--green, #27ae60); display: none; }
+    .gift-ext-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.8rem 2rem; background: var(--c3); color: var(--white); text-decoration: none; font-family: 'Inter', sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; border-radius: 2px; transition: background .2s; }
+    .gift-ext-btn:hover { background: var(--c2); }
+    .gift-modal-note { font-size: 0.72rem; color: var(--c2); line-height: 1.6; }
+
+    /* ── FOOTER ── */
+    footer { background: var(--c3); padding: 5rem 2rem 3rem; text-align: center; }
+    footer img { width: 55px; display: block; margin: 0 auto 1.8rem; filter: brightness(0) invert(1); opacity: 0.4; }
+    .footer-names { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 300; color: rgba(255,255,255,0.65); letter-spacing: 0.04em; margin-bottom: 0.4rem; }
+    .footer-date { font-size: 0.62rem; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(255,255,255,0.28); }
+    .footer-line { width: 1px; height: 36px; background: rgba(255,255,255,0.1); margin: 1.8rem auto; }
+    .footer-copy { font-size: 0.62rem; color: rgba(255,255,255,0.18); letter-spacing: 0.1em; }
+
+    /* ── HOSPEDAGEM CAROUSEL ── */
+    .hosp-carousel-wrap { position: relative; margin-top: 3rem; }
+    .hospedagem-grid {
+      display: flex; gap: 1.5rem; overflow-x: auto; scroll-snap-type: x mandatory;
+      scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
+      padding-bottom: 1rem; text-align: left;
+      scrollbar-width: none;
+    }
+    .hospedagem-grid::-webkit-scrollbar { display: none; }
+    .hospedagem-grid .hosp-card { flex: 0 0 min(360px, 82vw); scroll-snap-align: start; }
+    .hosp-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; background: var(--white); border: 1px solid rgba(192,203,216,0.6); box-shadow: 0 4px 16px rgba(57,78,106,0.12); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2; transition: background .2s, box-shadow .2s; }
+    .hosp-arrow:hover { background: var(--c3); border-color: var(--c3); }
+    .hosp-arrow:hover svg { stroke: white; }
+    .hosp-arrow svg { stroke: var(--c3); transition: stroke .2s; }
+    .hosp-arrow-left { left: -20px; }
+    .hosp-arrow-right { right: -20px; }
+    @media (max-width: 600px) { .hosp-arrow-left { left: 4px; } .hosp-arrow-right { right: 4px; } }
+    .hosp-card { background: var(--white); border: 1px solid rgba(192,203,216,0.5); border-radius: 3px; overflow: hidden; transition: box-shadow .25s, transform .25s; }
+    .hosp-card:hover { box-shadow: 0 12px 40px rgba(57,78,106,0.1); transform: translateY(-3px); }
+    .hosp-card-header { background: var(--c3); padding: 1.6rem 1.8rem 1.4rem; }
+    .hosp-card-header h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 400; color: var(--white); margin-bottom: 0.3rem; }
+    .hosp-card-header p { font-size: 0.7rem; letter-spacing: 0.08em; color: rgba(192,203,216,0.65); line-height: 1.6; }
+    .hosp-card-body { padding: 1.6rem 1.8rem; display: flex; flex-direction: column; gap: 1rem; }
+    .hosp-row { display: flex; gap: 0.8rem; align-items: flex-start; }
+    .hosp-row svg { flex-shrink: 0; margin-top: 1px; stroke: var(--c2); }
+    .hosp-row-text { font-size: 0.82rem; color: var(--c3); line-height: 1.6; }
+    .hosp-row-text strong { font-weight: 500; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c2); display: block; margin-bottom: 0.15rem; }
+    .hosp-alert { background: rgba(192,203,216,0.18); border-left: 3px solid var(--c2); border-radius: 0 2px 2px 0; padding: 0.9rem 1rem; font-size: 0.78rem; color: var(--c3); line-height: 1.6; }
+    .hosp-alert strong { color: var(--c3); }
+    .hosp-card-footer { padding: 0 1.8rem 1.6rem; display: flex; gap: 0.8rem; flex-wrap: wrap; }
+    .hosp-btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.55rem 1.1rem; font-family: 'Inter', sans-serif; font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; text-decoration: none; border-radius: 2px; transition: background .2s, color .2s; }
+    .hosp-btn-primary { background: var(--c3); color: var(--white); }
+    .hosp-btn-primary:hover { background: var(--c2); }
+    .hosp-btn-secondary { border: 1px solid var(--c1); color: var(--c3); }
+    .hosp-btn-secondary:hover { background: var(--c1); }
+    .hosp-map { width: 100%; height: 180px; overflow: hidden; }
+    .hosp-map iframe { width: 100%; height: 100%; border: 0; display: block; }
+    .hosp-prices { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    .hosp-price-item { background: var(--c4); border: 1px solid rgba(192,203,216,0.5); border-radius: 3px; padding: 0.9rem; display: flex; flex-direction: column; gap: 0.15rem; position: relative; }
+    .hosp-price-promo { border-color: var(--c2); }
+    .hosp-price-badge { position: absolute; top: -0.55rem; right: 0.7rem; background: var(--c2); color: var(--white); font-size: 0.55rem; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.15rem 0.5rem; border-radius: 20px; }
+    .hosp-price-label { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--c2); }
+    .hosp-price-val { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; color: var(--c3); font-weight: 500; line-height: 1.1; }
+    .hosp-price-detail { font-size: 0.65rem; color: var(--c2); line-height: 1.4; margin-top: 0.1rem; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .nav-links { gap: 1.1rem; }
+      .nav-links a { font-size: 0.6rem; }
+      .cards-grid { grid-template-columns: 1fr 1fr; }
+      .cnt-sep { display: none; }
+    }
+    @media (max-width: 380px) {
+      .cards-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════
+     INTRO OVERLAY
+════════════════════════════════════ -->
+<div id="intro">
+
+  <!-- FASE 1 — versículo -->
+  <div id="phase-verse">
+    <div class="intro-deco">
+      <span class="dl"></span><span class="dd"></span><span class="dl"></span>
+    </div>
+    <p class="verse-ref">Mateus 19 : 6</p>
+    <p class="verse-text" id="verse-typed"><span class="cursor" id="cursor-el"></span></p>
+  </div>
+
+  <!-- FASE 2 — bênção dos pais -->
+  <div id="phase-blessing">
+    <p class="blessing-tag">Com a bênção de Deus</p>
+    <h2 class="blessing-heading">e dos Pais</h2>
+    <div class="blessing-grid">
+      <div class="blessing-family">
+        <p class="blessing-name">Favilla Gentil Neto</p>
+        <span class="blessing-and">&amp;</span>
+        <p class="blessing-name">Júlia de Fátima Alves Gentil</p>
+      </div>
+      <div class="blessing-sep"></div>
+      <div class="blessing-family">
+        <p class="blessing-name">Moisés Barroso da Silva</p>
+        <span class="blessing-and">&amp;</span>
+        <p class="blessing-name">Maria Antônia Duarte de Sousa</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<button id="skip-btn" onclick="skipIntro()">Pular</button>
+
+<!-- ════════════════════════════════════
+     MAIN PAGE
+════════════════════════════════════ -->
+<div id="main">
+
+  <!-- NAV -->
+  <nav id="navbar">
+    <img src="monograma sem fundo.png" alt="M&F" class="nav-logo" ondblclick="window.location.href='admin.html'" style="cursor:default;" />
+    <ul class="nav-links">
+      <li><a href="#evento">Evento</a></li>
+      <li><a href="#rsvp">Confirmação</a></li>
+      <li><a href="#presentes">Presentes</a></li>
+      <li><a href="#acomodacoes">Acomodações</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-inner">
+      <img src="monograma sem fundo.png" alt="Maressa &amp; Favila" class="hero-monogram" />
+      <h1 class="hero-names">Maressa <span class="amp">&</span> Favila</h1>
+      <p class="hero-date">01 &middot; 08 &middot; 2026</p>
+      <div class="hero-divider">
+        <span class="hl"></span><span class="hd"></span><span class="hl"></span>
+      </div>
+    </div>
+    <div class="hero-scroll" aria-hidden="true">
+      <span>Rolar</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    </div>
+  </section>
+
+  <!-- VERSÍCULO (seção da página) -->
+  <section id="versiculo" class="section">
+    <div class="section-inner" style="text-align:center;">
+      <span class="qdeco reveal">&ldquo;</span>
+      <blockquote class="reveal d1">
+        Assim, eles já não são dois, mas sim uma só carne. Portanto, o que Deus uniu, ninguém separe.
+      </blockquote>
+      <div class="ornament reveal d2" style="justify-content:center;color:rgba(255,255,255,0.2);">
+        <span class="ol"></span>
+        <svg class="os" width="14" height="14" viewBox="0 0 24 24" fill="rgba(122,149,184,0.7)"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+        <span class="ol"></span>
+      </div>
+      <cite class="reveal d3" style="display:block;">Mateus 19:6</cite>
+    </div>
+  </section>
+
+  <!-- EVENTO -->
+  <section id="evento" class="section">
+    <div class="section-inner" style="text-align:center;">
+      <span class="section-tag reveal">Informações</span>
+      <h2 class="section-heading reveal d1">
+        O grande dia<br/><em style="font-style:italic;font-weight:300;">está chegando</em>
+      </h2>
+      <p class="reveal d2" style="font-size:0.88rem;color:var(--c2);line-height:1.8;max-width:480px;margin:0 auto;">
+        Cerimônia, recepção e festa — tudo no mesmo lugar, com o coração transbordando de alegria.
+      </p>
+      <div class="ornament reveal d3" style="justify-content:center;">
+        <span class="ol"></span>
+        <svg class="os" width="13" height="13" viewBox="0 0 24 24" fill="var(--c2)"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+        <span class="ol"></span>
+      </div>
+
+      <div class="cards-grid">
+        <div class="card reveal d1">
+          <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+          <p class="card-tag">Data</p>
+          <p class="card-val">01 de Agosto<br/>de 2026</p>
+        </div>
+        <div class="card reveal d2">
+          <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg></div>
+          <p class="card-tag">Horário</p>
+          <p class="card-val">15h30</p>
+        </div>
+        <div class="card reveal d3">
+          <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1v-9.5z"/><path d="M9 21V12h6v9"/></svg></div>
+          <p class="card-tag">Local</p>
+          <p class="card-val">Villa dos Parikas</p>
+          <p class="card-sub">Paricatuba · AM</p>
+        </div>
+        <div class="card reveal d4">
+          <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z"/></svg></div>
+          <p class="card-tag">Dress Code</p>
+          <p class="card-val">Passeio Completo</p>
+          <p class="card-sub">Proibido branco e off-white</p>
+        </div>
+      </div>
+
+      <div class="alert-box reveal">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span><strong>Atenção:</strong> Paricatuba fica a cerca de 40 km de Manaus. Saia com antecedência — pode haver trânsito no trajeto.</span>
+      </div>
+
+      <div class="map-wrapper reveal">
+        <div class="map-label">Villa dos Parikas · Paricatuba, AM</div>
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3984.0479514037456!2d-60.2380745!3d-3.0818764000000005!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x926c6dc8dffa29af%3A0xdba6ba84a9830da7!2sVilla%20dos%20Parikas%20%7C%20Pousada%20em%20Paricatuba%20-%20Amazonas!5e0!3m2!1spt-BR!2sbr!4v1775791801192!5m2!1spt-BR!2sbr" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Villa dos Parikas"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTAGEM REGRESSIVA -->
+  <section id="countdown" class="section">
+    <div class="section-inner" style="text-align:center;">
+      <span class="section-tag reveal">Falta pouco para o grande dia</span>
+      <h2 class="section-heading reveal d1" style="color:rgba(255,255,255,0.82);">
+        Contagem<br/><em style="font-style:italic;font-weight:300;">regressiva</em>
+      </h2>
+      <div class="ornament reveal d2" style="justify-content:center;color:rgba(255,255,255,0.18);">
+        <span class="ol"></span>
+        <svg class="os" width="13" height="13" viewBox="0 0 24 24" fill="rgba(122,149,184,0.6)"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+        <span class="ol"></span>
+      </div>
+      <div class="countdown-grid reveal d3">
+        <div class="cnt-item"><span class="cnt-num" id="cnt-d">--</span><span class="cnt-lbl">Dias</span></div>
+        <span class="cnt-sep">·</span>
+        <div class="cnt-item"><span class="cnt-num" id="cnt-h">--</span><span class="cnt-lbl">Horas</span></div>
+        <span class="cnt-sep">·</span>
+        <div class="cnt-item"><span class="cnt-num" id="cnt-m">--</span><span class="cnt-lbl">Minutos</span></div>
+        <span class="cnt-sep">·</span>
+        <div class="cnt-item"><span class="cnt-num" id="cnt-s">--</span><span class="cnt-lbl">Segundos</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RSVP -->
+  <section id="rsvp" class="section">
+    <div class="section-inner" style="text-align:center;">
+      <span class="section-tag reveal">Confirmação de Presença</span>
+      <h2 class="section-heading reveal d1">
+        Guarde esta data<br/><em style="font-style:italic;font-weight:300;">no seu coração</em>
+      </h2>
+      <p class="reveal d2" style="font-size:0.88rem;color:var(--c2);line-height:1.8;max-width:440px;margin:0 auto;">
+        Sua presença tornará este dia ainda mais especial. Confirme até <strong>01 de julho de 2026.</strong>
+      </p>
+      <div class="ornament reveal d3" style="justify-content:center;">
+        <span class="ol"></span>
+        <svg class="os" width="13" height="13" viewBox="0 0 24 24" fill="var(--c2)"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+        <span class="ol"></span>
+      </div>
+      <div class="form-wrapper reveal d2">
+
+        <!-- PASSO 1: busca de nome -->
+        <div id="rsvp-step1">
+          <div class="form-field">
+            <label for="nome">Digite seu nome</label>
+            <input type="text" id="nome" placeholder="Comece a digitar seu nome…" autocomplete="off" oninput="rsvpSearch(this.value)" />
+            <span class="input-check" id="nome-check">✓</span>
+            <div class="nome-dropdown hidden" id="nome-dropdown"></div>
+            <p class="nome-msg hidden" id="nome-notfound">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+              Nome não encontrado na lista de convidados.
+            </p>
+          </div>
+          <div class="nome-confirmed hidden" id="nome-confirmed">
+            <span class="cf-icon">✓</span>
+            <div>
+              <p class="cf-name" id="cf-name"></p>
+              <p class="cf-invite" id="cf-invite"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- PASSO 2: acompanhantes do convite -->
+        <div id="rsvp-step2" class="hidden">
+          <div class="companions-header">
+            <span>Acompanhantes do seu convite</span>
+            <small>Marque quem mais do seu convite vai comparecer</small>
+          </div>
+          <div id="companions-checklist"></div>
+          <button class="btn-submit" onclick="submitRSVP()">Confirmar minha presença</button>
+        </div>
+
+        <!-- SUCESSO -->
+        <div id="rsvp-success">
+          <span class="sicon">✦</span>
+          <p>Que alegria! Te esperamos.</p>
+          <small>Sua presença foi confirmada. Nos vemos em 01.08.2026.</small>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- PRESENTES -->
+  <section id="presentes" class="section">
+    <div class="section-inner">
+      <div style="text-align:center;">
+        <span class="section-tag reveal">Lista de Presentes</span>
+        <h2 class="section-heading reveal d1">
+          O que eles<br/><em style="font-style:italic;font-weight:300;">realmente querem</em>
+        </h2>
+        <p class="reveal d2" style="font-size:0.88rem;color:var(--c2);line-height:1.8;max-width:460px;margin:0 auto;">
+          Sem julgamentos — a lista é honesta.
+        </p>
+      </div>
+
+      <div class="gift-grid">
+
+        <div class="gift-card reveal d1">
+          <div class="gift-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+          <p class="gift-name">Dia de Spa para a Noiva</p>
+          <p class="gift-desc">Massagem, hidratação, esfoliação — tudo que ela merece depois de planejar esse casamento inteiro.</p>
+          <span class="gift-tag">Para ela</span>
+          <div class="gift-footer">
+            <div class="gift-price"><small>contribuição</small>R$ 350</div>
+            <button class="gift-btn" onclick="openGiftModal('Dia de Spa para a Noiva','R$ 350')">Presentear</button>
+          </div>
+        </div>
+
+        <div class="gift-card reveal d2">
+          <div class="gift-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg></div>
+          <p class="gift-name">Carnes para o Churrasco</p>
+          <p class="gift-desc">Picanha, costela, fraldinha… ele já está de churrasqueira em mãos esperando sua contribuição.</p>
+          <span class="gift-tag">Para ele</span>
+          <div class="gift-footer">
+            <div class="gift-price"><small>contribuição</small>R$ 200</div>
+            <button class="gift-btn" onclick="openGiftModal('Carnes para o Churrasco','R$ 200')">Presentear</button>
+          </div>
+        </div>
+
+        <div class="gift-card reveal d3">
+          <div class="gift-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+          <p class="gift-name">TV 70" para o Netflix</p>
+          <p class="gift-desc">Porque depois do casamento a vida é série, sofá e manta. Tela grande, por favor.</p>
+          <span class="gift-tag">Para os dois</span>
+          <div class="gift-footer">
+            <div class="gift-price"><small>contribuição</small>R$ 500</div>
+            <button class="gift-btn" onclick="openGiftModal('TV 70&quot; para o Netflix','R$ 500')">Presentear</button>
+          </div>
+        </div>
+
+        <div class="gift-card reveal d1">
+          <div class="gift-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></div>
+          <p class="gift-name">Lua de Mel dos Sonhos</p>
+          <p class="gift-desc">Não importa o destino, desde que tenha praia, sol e nenhum compromisso por pelo menos uma semana.</p>
+          <span class="gift-tag">Para os dois</span>
+          <div class="gift-footer">
+            <div class="gift-price"><small>contribuição</small>R$ 500</div>
+            <button class="gift-btn" onclick="openGiftModal('Lua de Mel dos Sonhos','R$ 500')">Presentear</button>
+          </div>
+        </div>
+
+        <div class="gift-card reveal d2">
+          <div class="gift-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg></div>
+          <p class="gift-name">Um Mês sem Cozinhar</p>
+          <p class="gift-desc">iFood, Uber Eats, delivery… qualquer coisa serve. Recém-casados não têm tempo pra fogão.</p>
+          <span class="gift-tag">Prático</span>
+          <div class="gift-footer">
+            <div class="gift-price"><small>contribuição</small>R$ 300</div>
+            <button class="gift-btn" onclick="openGiftModal('Um Mês sem Cozinhar','R$ 300')">Presentear</button>
+          </div>
+        </div>
+
+        <div class="gift-card reveal d3">
+          <div class="gift-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M20 9V7a2 2 0 00-2-2H6a2 2 0 00-2 2v2M4 9h16v11a2 2 0 01-2 2H6a2 2 0 01-2-2V9zM10 13v4M14 13v4"/></svg></div>
+          <p class="gift-name">Sofá Novo para o Casal</p>
+          <p class="gift-desc">Grande, confortável e com espaço pros dois — e talvez pra um cachorro no futuro. Só talvez.</p>
+          <span class="gift-tag">Para os dois</span>
+          <div class="gift-footer">
+            <div class="gift-price"><small>contribuição</small>R$ 450</div>
+            <button class="gift-btn" onclick="openGiftModal('Sofá Novo para o Casal','R$ 450')">Presentear</button>
+          </div>
+        </div>
+
+        <div class="gift-card reveal d1">
+          <div class="gift-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <p class="gift-name">Flores Todo Mês</p>
+          <p class="gift-desc">Porque o romance não precisa acabar depois do casamento. Assinatura de flores mensais é a resposta.</p>
+          <span class="gift-tag">Para ela</span>
+          <div class="gift-footer">
+            <div class="gift-price"><small>contribuição</small>R$ 250</div>
+            <button class="gift-btn" onclick="openGiftModal('Flores Todo Mês','R$ 250')">Presentear</button>
+          </div>
+        </div>
+
+        <div class="gift-card reveal d2">
+          <div class="gift-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><rect x="6" y="11" width="12" height="10" rx="1"/><path d="M14 11V7a2 2 0 10-4 0v4M4 11h16"/></svg></div>
+          <p class="gift-name">Console para o Noivo</p>
+          <p class="gift-desc">Ele vai precisar de algo pra fazer enquanto ela assiste reality show. Parceria sustentável.</p>
+          <span class="gift-tag">Para ele</span>
+          <div class="gift-footer">
+            <div class="gift-price"><small>contribuição</small>R$ 500</div>
+            <button class="gift-btn" onclick="openGiftModal('Console para o Noivo','R$ 500')">Presentear</button>
+          </div>
+        </div>
+
+        <div class="gift-card reveal d3">
+          <div class="gift-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+          <p class="gift-name">Ajuda no Novo Lar</p>
+          <p class="gift-desc">Qualquer coisa pra deixar a casa deles mais bonita e aconchegante. Toda contribuição é bem-vinda.</p>
+          <span class="gift-tag">Prático</span>
+          <div class="gift-footer">
+            <div class="gift-price"><small>contribuição</small>R$ 200</div>
+            <button class="gift-btn" onclick="openGiftModal('Ajuda no Novo Lar','R$ 200')">Presentear</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ACOMODAÇÕES -->
+  <section id="acomodacoes" class="section">
+    <div class="section-inner">
+      <div style="text-align:center;">
+        <span class="section-tag reveal">Onde se hospedar</span>
+        <h2 class="section-heading reveal d1">
+          Fique perto<br/><em style="font-style:italic;font-weight:300;">de nós</em>
+        </h2>
+        <p class="reveal d2" style="font-size:0.88rem;color:var(--c2);line-height:1.8;max-width:480px;margin:0 auto;">
+          Para quem vem de longe, selecionamos hospedagens próximas ao local da festa. Reserve com antecedência!
+        </p>
+      </div>
+
+      <div class="hosp-carousel-wrap">
+      <button class="hosp-arrow hosp-arrow-left" onclick="hospScroll(-1)" aria-label="Anterior">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button class="hosp-arrow hosp-arrow-right" onclick="hospScroll(1)" aria-label="Próximo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+      <div class="hospedagem-grid" id="hosp-grid">
+
+        <!-- Card 1: Pousada da Vila -->
+        <div class="hosp-card reveal d1">
+          <div class="hosp-card-header">
+            <h3>Pousada da Vila</h3>
+            <p>Rua Cícero Monteiro, 28 · Vila de Paricatuba, Iranduba — AM</p>
+          </div>
+          <div class="hosp-card-body">
+            <div class="hosp-row">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .91h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+              <div class="hosp-row-text">
+                <strong>Contato</strong>
+                <a href="tel:+5592981489558" style="color:var(--c3);text-decoration:none;">(92) 98148-9558</a>
+              </div>
+            </div>
+            <div class="hosp-alert">
+              <strong>Atenção:</strong> O check-in deve ser feito <strong>antes do evento</strong> — o horário máximo de check é às <strong>19h</strong>. Pegue a chave na pousada antes de ir para a festa.
+            </div>
+            <div class="hosp-row">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <div class="hosp-row-text">
+                <strong>Como chegar</strong>
+                Km 21 à direita depois da ponte, Vila de Paricatuba. Na entrada da vila tem uma placa de boas-vindas. Fica ao lado da Ruína de Paricatuba.
+              </div>
+            </div>
+          </div>
+          <div class="hosp-map">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3983.9218344944197!2d-60.441291675029014!3d-3.1153812468601507!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x926c655247d77dd1%3A0x8187d9ac22f57c7e!2sPousada%20da%20Vila!5e0!3m2!1spt-BR!2sbr!4v1775792671815!5m2!1spt-BR!2sbr" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Pousada da Vila"></iframe>
+          </div>
+          <div class="hosp-card-footer">
+            <a href="https://maps.google.com/?q=-3.083619,-60.234638" target="_blank" rel="noopener" class="hosp-btn hosp-btn-primary">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Ver no mapa
+            </a>
+            <a href="tel:+5592981489558" class="hosp-btn hosp-btn-secondary">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .91h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+              Ligar
+            </a>
+          </div>
+        </div>
+
+        <!-- Card 2: Pousada Unifamiliar Bella Vista -->
+        <div class="hosp-card reveal d2">
+          <div class="hosp-card-header">
+            <h3>Bella Vista Paricatuba</h3>
+            <p>Pousada Unifamiliar · Paricatuba, AM · 30 km da Ponte Rio Negro</p>
+          </div>
+          <div class="hosp-card-body">
+
+            <!-- Preços -->
+            <div class="hosp-prices">
+              <div class="hosp-price-item">
+                <span class="hosp-price-label">Sáb → Dom</span>
+                <span class="hosp-price-val">R$ 1.000</span>
+                <span class="hosp-price-detail">Check-in sáb 10h · Checkout dom 16h</span>
+              </div>
+              <div class="hosp-price-item hosp-price-promo">
+                <span class="hosp-price-badge">Promo</span>
+                <span class="hosp-price-label">Sex → Dom</span>
+                <span class="hosp-price-val">R$ 1.500</span>
+                <span class="hosp-price-detail">Check-in sex 10h · Checkout dom 16h</span>
+              </div>
+            </div>
+            <p style="font-size:0.72rem;color:var(--c2);">Valores para até 10 pessoas. Acima disso, valor combinado antecipadamente. Reserva confirmada com 50% do valor.</p>
+
+            <!-- Comodidades -->
+            <div class="hosp-row">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <div class="hosp-row-text">
+                <strong>Estrutura</strong>
+                2 quartos climatizados (1 suíte) · Sala · Cozinha equipada · 2 banheiros · Churrasqueira · Deck com vista para o Rio Negro · Piscina · Varanda com redes · Quadra de areia · Mirante · Wi-Fi fibra ótica · Acesso à praia e rio pelo terreno
+              </div>
+            </div>
+
+            <div class="hosp-row">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+              <div class="hosp-row-text">
+                <strong>Quartos</strong>
+                Cada quarto: 1 cama de casal + 1 beliche + 1 atador de rede. <em>Necessário levar redes e toalhas de banho.</em>
+              </div>
+            </div>
+
+          </div>
+          <div class="hosp-card-footer">
+            <a href="https://www.instagram.com/bellavistaparicatuba" target="_blank" rel="noopener" class="hosp-btn hosp-btn-primary">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+              @bellavistaparicatuba
+            </a>
+          </div>
+        </div>
+
+        <!-- Card 3: Rio Negro Chalé Pousada -->
+        <div class="hosp-card reveal d3">
+          <div class="hosp-card-header">
+            <h3>Rio Negro Chalé Pousada</h3>
+            <p>Paricatuba · Amazonas · Check-in 10h · Check-out 16h</p>
+          </div>
+          <div class="hosp-card-body">
+
+            <div class="hosp-prices">
+              <div class="hosp-price-item" style="grid-column:1/-1;">
+                <span class="hosp-price-label">Diária</span>
+                <span class="hosp-price-val">R$ 550</span>
+                <span class="hosp-price-detail">Até 5 pessoas · +R$ 50/pessoa adicional (máx. +2) · Caução R$ 200 devolvido no checkout · 50% da reserva 48h antes da entrada</span>
+              </div>
+            </div>
+
+            <div class="hosp-row">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <div class="hosp-row-text">
+                <strong>Área interna</strong>
+                Ar condicionado · Wi-Fi · TV · Sofá · Cama de casal · Beliche de casal · Beliche de solteiro · Travesseiros · Cômodas · Lavabo. <em>Não disponibilizam toalhas e sabonetes.</em>
+              </div>
+            </div>
+
+            <div class="hosp-row">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z"/></svg>
+              <div class="hosp-row-text">
+                <strong>Varanda, Deck & Edícula</strong>
+                Mesas, cadeiras, armadores de redes, chuveiro, cadeiras de sol e vista para o Rio Negro · Fogão, botija, churrasqueira, louças, geladeira e banheiro
+              </div>
+            </div>
+
+            <div class="hosp-row">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg>
+              <div class="hosp-row-text">
+                <strong>Alimentação</strong>
+                Não serve refeições, mas a edícula é equipada para trazer e preparar sua comida. A Vila tem mercadinhos, café regional, restaurantes e pizzaria.
+              </div>
+            </div>
+
+            <div class="hosp-alert">
+              <strong>Pets:</strong> A estrutura não é compatível com animais de estimação.
+            </div>
+
+          </div>
+          <div class="hosp-card-footer">
+            <a href="https://www.instagram.com/rionegrochalepousada" target="_blank" rel="noopener" class="hosp-btn hosp-btn-primary">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+              @rionegrochalepousada
+            </a>
+          </div>
+        </div>
+
+      </div><!-- fim hospedagem-grid -->
+      </div><!-- fim hosp-carousel-wrap -->
+    </div>
+  </section>
+
+  <!-- MODAL PRESENTE -->
+  <div class="gift-modal-bg" id="gift-modal-bg" onclick="closeGiftModal(event)">
+    <div class="gift-modal">
+      <div class="gift-modal-head">
+        <div class="gift-modal-head-info">
+          <h3 id="modal-gift-name">Presente</h3>
+          <span id="modal-gift-price"></span>
+        </div>
+        <button class="gift-modal-close" onclick="closeGiftModal(true)">×</button>
+      </div>
+      <div class="gift-modal-tabs">
+        <button class="gift-modal-tab active" onclick="switchTab('pix')">PIX</button>
+        <button class="gift-modal-tab" onclick="switchTab('link')">Link de Pagamento</button>
+      </div>
+      <div class="gift-modal-body">
+        <!-- TAB PIX -->
+        <div class="gift-tab-pane active" id="tab-pix">
+          <img class="gift-qr" src="qr code pix.png" alt="QR Code PIX" />
+          <p class="gift-modal-note">Escaneie o QR Code ou copie a chave abaixo:</p>
+          <div class="gift-pix-key">
+            <span id="pix-key-text">00020126580014BR.GOV.BCB.PIX01367f025a7c-6682-473f-a394-305469f0db845204000053039865802BR5922Maressa Duarte Barroso6009SAO PAULO62140510fdBAwZGAv163045EB7</span>
+            <button class="gift-copy-btn" onclick="copyPix()" title="Copiar chave">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+          <p class="gift-copy-msg" id="copy-msg">✓ Chave copiada!</p>
+          <p class="gift-modal-note" style="font-size:0.65rem;opacity:.6;">Após o pagamento, não é necessário enviar comprovante. Obrigado!</p>
+        </div>
+        <!-- TAB LINK -->
+        <div class="gift-tab-pane" id="tab-link">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--c1)" stroke-width="1"><path d="M20 12v10H4V12"/><rect x="2" y="7" width="20" height="5" rx="1"/><path d="M12 22V7M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>
+          <p class="gift-modal-note">Clique abaixo para ser direcionado à página de pagamento seguro:</p>
+          <a href="#" target="_blank" rel="noopener" class="gift-ext-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+            Ir para pagamento
+          </a>
+          <p class="gift-modal-note" style="font-size:0.65rem;opacity:.6;">Você será redirecionado para uma página externa segura.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <img src="monograma sem fundo.png" alt="M&F" />
+    <p class="footer-names">Maressa &amp; Favila</p>
+    <p class="footer-date">01 · 08 · 2026 &nbsp;·&nbsp; Paricatuba, AM</p>
+    <div class="footer-line"></div>
+    <p class="footer-copy">Feito com amor ✦</p>
+  </footer>
+
+</div>
+
+<script>
+/* ════ INTRO ENGINE ════ */
+const VERSE = '"Assim, eles já não são dois, mas sim uma só carne. Portanto, o que Deus uniu, ninguém separe."';
+let introDone = false;
+
+/* ── MODAL PRESENTES ── */
+function openGiftModal(name, price) {
+  document.getElementById('modal-gift-name').textContent = name;
+  document.getElementById('modal-gift-price').textContent = price;
+  document.getElementById('gift-modal-bg').classList.add('open');
+  switchTab('pix');
+}
+function closeGiftModal(force) {
+  if (force === true || force.target === document.getElementById('gift-modal-bg')) {
+    document.getElementById('gift-modal-bg').classList.remove('open');
+  }
+}
+function switchTab(tab) {
+  document.querySelectorAll('.gift-modal-tab').forEach((t,i) => t.classList.toggle('active', (tab==='pix'?i===0:i===1)));
+  document.getElementById('tab-pix').classList.toggle('active', tab==='pix');
+  document.getElementById('tab-link').classList.toggle('active', tab==='link');
+  document.getElementById('copy-msg').style.display = 'none';
+}
+function copyPix() {
+  const key = document.getElementById('pix-key-text').textContent;
+  navigator.clipboard.writeText(key).then(() => {
+    const msg = document.getElementById('copy-msg');
+    msg.style.display = 'block';
+    setTimeout(() => { msg.style.display = 'none'; }, 2500);
+  });
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeGiftModal(true); });
+
+function hospScroll(dir) {
+  const grid = document.getElementById('hosp-grid');
+  const card = grid.querySelector('.hosp-card');
+  const w = card ? card.offsetWidth + 24 : 380;
+  grid.scrollBy({ left: dir * w, behavior: 'smooth' });
+}
+
+function skipIntro() {
+  if (introDone) return;
+  introDone = true;
+  clearAllTimers();
+  document.getElementById('skip-btn').style.display = 'none';
+  document.getElementById('intro').classList.add('out');
+  launchMain();
+}
+
+const timers = [];
+function delay(fn, ms) { const t = setTimeout(fn, ms); timers.push(t); return t; }
+function clearAllTimers() { timers.forEach(clearTimeout); }
+
+function launchMain() {
+  const main = document.getElementById('main');
+  main.classList.add('visible');
+  initReveal();
+  initCountdown();
+}
+
+/* — Fase 1: typewriter — */
+function startIntro() {
+  const phase = document.getElementById('phase-verse');
+  const deco  = phase.querySelector('.intro-deco');
+  const ref   = phase.querySelector('.verse-ref');
+  const typed = document.getElementById('verse-typed');
+  const cursor= document.getElementById('cursor-el');
+
+  phase.classList.add('active');
+
+  delay(() => { deco.classList.add('show'); }, 400);
+  delay(() => { ref.classList.add('show'); }, 900);
+
+  /* typewriter */
+  let i = 0;
+  const speed = 38;
+  delay(function type() {
+    if (i < VERSE.length) {
+      typed.insertBefore(document.createTextNode(VERSE[i]), cursor);
+      i++;
+      delay(type, speed);
+    } else {
+      /* typing done — pause, then transition to fase 2 */
+      delay(() => {
+        cursor.style.display = 'none';
+        phase.style.opacity = '0';
+        delay(() => {
+          phase.classList.remove('active');
+          startBlessing();
+        }, 700);
+      }, 1400);
+    }
+  }, 1500);
+}
+
+/* — Fase 2: bênção — */
+function startBlessing() {
+  const phase = document.getElementById('phase-blessing');
+  phase.classList.add('active');
+  delay(() => {
+    /* fade out intro e abre página */
+    document.getElementById('intro').classList.add('out');
+    document.getElementById('skip-btn').style.display = 'none';
+    introDone = true;
+    launchMain();
+  }, 3200);
+}
+
+startIntro();
+
+/* ════ NAVBAR SCROLL ════ */
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', scrollY > 40);
+}, { passive: true });
+
+/* ════ SCROLL REVEAL ════ */
+function initReveal() {
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.14 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+}
+
+/* ════ COUNTDOWN ════ */
+function initCountdown() {
+  const target = new Date('2026-08-01T15:30:00').getTime();
+  function tick() {
+    const diff = target - Date.now();
+    if (diff <= 0) { ['cnt-d','cnt-h','cnt-m','cnt-s'].forEach(id => document.getElementById(id).textContent = '00'); return; }
+    const pad = n => String(n).padStart(2,'0');
+    document.getElementById('cnt-d').textContent = pad(Math.floor(diff/86400000));
+    document.getElementById('cnt-h').textContent = pad(Math.floor(diff%86400000/3600000));
+    document.getElementById('cnt-m').textContent = pad(Math.floor(diff%3600000/60000));
+    document.getElementById('cnt-s').textContent = pad(Math.floor(diff%60000/1000));
+  }
+  tick(); setInterval(tick, 1000);
+}
+
+/* ════ RSVP — lista de convidados ════ */
+const RSVP_GUESTS = [{"invite":"Favilla Gentil E Familia","group":"Família do noivo","guests":[{"name":"Favilla Gentil Neto","note":"Pai"},{"name":"Julia De Fatima Alves Gentil","note":"Mãe"},{"name":"Maria Felipe Alves","note":"Avó"},{"name":"Antonio Monteiro","note":"Tio"},{"name":"Elias","note":"Tio"}]},{"invite":"Yago Gentil E Familia","group":"Família do noivo","guests":[{"name":"Yago Felipe Alves Gentil","note":"Irmão"},{"name":"Rayana Cardoso","note":"Madrinha"},{"name":"Bernardo Gentil","note":"Afilhado"}]},{"invite":"Nasser Alves E Familia","group":"Família do noivo","guests":[{"name":"Nasser Felipe","note":"Tio"},{"name":"Aline Felipe","note":"Tia"},{"name":"Lara Felipe","note":"Prima"},{"name":"Simao Nasser","note":"Primo"},{"name":"Kayo","note":"Primo"}]},{"invite":"Benedite Felipe E Familia","group":"Família do noivo","guests":[{"name":"Banedita Felipe","note":"Tia"},{"name":"Beatriz Naarah","note":"Prima"},{"name":"Arom Benamim","note":"Primo"},{"name":"Barbara Safira","note":"Prima"}]},{"invite":"Taumaturgo Coelho E Familia","group":"Família do noivo","guests":[{"name":"Taumaturgo Colheo","note":"Tio"},{"name":"Cristiane Coelho","note":"Tia"},{"name":"Icaro Coelho","note":"Primo"},{"name":"Moises Coelho","note":"Primo"},{"name":"Newton Coleho","note":"Primo"},{"name":"Thais Coelho","note":"Prima"},{"name":"Mariah Coelho","note":"Prima"}]},{"invite":"Maria Socorro E Familia","group":"Família do noivo","guests":[{"name":"Socorro","note":"Tia"},{"name":"Atena","note":"Prima"},{"name":"Myrrana","note":"Prima"},{"name":"Rafael","note":"Primo"},{"name":"Ricardinho","note":"Primo"}]},{"invite":"Paulo E Familia","group":"Família do noivo","guests":[{"name":"Pepita","note":"Tia"},{"name":"Paulo","note":"Tio"}]},{"invite":"Higino E Familia","group":"Família do noivo","guests":[{"name":"Higino Figueiredo","note":"Tio"},{"name":"Isabel Felipe","note":"Tia"}]},{"invite":"Higino E Familia","group":"Família do noivo","guests":[{"name":"Higino Figueiredo","note":"Primo"},{"name":"Izis Figueiredo","note":"Prima"},{"name":"Matheus","note":"Primo"},{"name":"Joao","note":"Primo"}]},{"invite":"Franciney E Familia","group":"Família do noivo","guests":[{"name":"Franciney Oliveira","note":"Primo"},{"name":"Kamilly","note":"Prima"}]},{"invite":"Ana Maura E Familia","group":"Família do noivo","guests":[{"name":"Ana Maura Gentil","note":"Tia"},{"name":"Mariana Gentil","note":"Prima"}]},{"invite":"Aluizio E Familia","group":"Família do noivo","guests":[{"name":"Aloizio Solyno","note":"Tio"},{"name":"Ionara Solyno","note":"Tia"}]},{"invite":"Thiago E Familia","group":"Família do noivo","guests":[{"name":"Thiago","note":"Primo"},{"name":"Carol","note":"Prima"}]},{"invite":"Cal E Familia","group":"Família do noivo","guests":[{"name":"Cal","note":"Tio"},{"name":"Elem","note":"Tia"},{"name":"Debora","note":"Prima"},{"name":"Danila","note":"Prima"}]},{"invite":"Daniel E Familia","group":"Família do noivo","guests":[{"name":"Daniel Cal","note":"Primo"},{"name":"Karla Cal","note":"Prima"}]},{"invite":"Augusta E Familia","group":"Família do noivo","guests":[{"name":"Augusta","note":"Tia"},{"name":"Bruno","note":"Primo"}]},{"invite":"Davi Cruz E Familia","group":"Família do noivo","guests":[{"name":"Davi Crus","note":"Primo"},{"name":"Karla Gentil","note":"Prima"},{"name":"Elizabeth","note":"Prima"},{"name":"Davizinho","note":"Primo"}]},{"invite":"Moises Barroso E Familia","group":"Família da noiva","guests":[{"name":"Moises Barroso Da Silva","note":"Pai da Noiva"},{"name":"Maria Antonia Duarte De Sousa","note":"Mãe da Noiva"}]},{"invite":"Maria Jose Duarte","group":"Família da noiva","guests":[{"name":"Maria Jose Duarte","note":"Tia da Noiva"}]},{"invite":"Cristina Duarte E Familia","group":"Família da noiva","guests":[{"name":"Maria Cristina Duarte","note":"Tia da Noiva"},{"name":"Cristian Duarte","note":"Primo da Noiva"}]},{"invite":"Vitor Duarte E Familia","group":"Família da noiva","guests":[{"name":"Vitor Hugo Duarte","note":"Primo"},{"name":"Maria Eduarda Vieira","note":"Prima"},{"name":"Bento Duarte - 3 Anos","note":"Sobrinho"}]},{"invite":"Jordana Pereira E Familia","group":"Família da noiva","guests":[{"name":"Jordana De Sousa Pereira","note":"Prima"},{"name":"Ygor Mattos","note":"Primo"},{"name":"Luis Otavio Mattos - 3 Anos","note":"Sobrinho"},{"name":"Mariza Rodrigues","note":""}]},{"invite":"Hilda Duarte","group":"Família da noiva","guests":[{"name":"Maria Hilda Duarte","note":"Tia da Noiva"}]},{"invite":"Maria Raimunda E Familia","group":"Família da noiva","guests":[{"name":"Maria Raimunda Duarte","note":"Tia da Noiva"},{"name":"Miriam Pereira","note":"Prima"}]},{"invite":"Julia Pereira E Familia","group":"Família da noiva","guests":[{"name":"Maria Julia Pereira","note":"Tia da Noiva"},{"name":"Jose Pereira","note":"Tio da Noiva"}]},{"invite":"Raimundo Duarte","group":"Família da noiva","guests":[{"name":"Robson Pereira","note":"Primo"},{"name":"Kerlyanne","note":"Prima"},{"name":"Heylen Pereira","note":"Prima"},{"name":"Apolo Pereira","note":"Primo"},{"name":"Elise Pereira","note":"Prima"}]},{"invite":"Jose Duarte E Familia","group":"Família da noiva","guests":[{"name":"Jose Duarte","note":"Tio da Noiva"},{"name":"Maria Jucilene De Oliveira","note":"Tia da Noiva"},{"name":"Guilherme Vinicius Oliveira","note":"Primo"}]},{"invite":"Anselmo Duarte E Familia","group":"Família da noiva","guests":[{"name":"Anselmo Duarte","note":"Tio da Noiva"},{"name":"Helena Oliveira","note":"Tia da Noiva"},{"name":"Anderson Oliveira","note":"Primo"},{"name":"Gabriel Oliveira","note":"Primo"},{"name":"Jessica Menezes","note":"Prima"}]},{"invite":"Elieni Araujo E Familia","group":"Família da noiva","guests":[{"name":"Elieni Duarte","note":"Tia da Noiva"},{"name":"Flavio Dias","note":"Tio da Noiva"},{"name":"Kele Caroline Araujo","note":"Prima"},{"name":"Rebeca Beatrice Araujo","note":"Prima"}]},{"invite":"Aldelina Rocha E Familia","group":"Família da noiva","guests":[{"name":"Aldelina Rocha","note":"Tia da Noiva"},{"name":"Anderson Rocha","note":"Primo"}]},{"invite":"Maria De Nazare E Bete","group":"Família da noiva","guests":[{"name":"Maria De Nazare Barroso","note":"Avó da Noiva"},{"name":"Elizabete Barroso","note":"Prima"}]},{"invite":"Jose Barroso E Familia","group":"Família da noiva","guests":[{"name":"Jose Barroso Da Silva","note":"Tio da Noiva"},{"name":"Magda Rocha","note":"Tia da Noiva"},{"name":"Nicole Barroso","note":"Prima"}]},{"invite":"Miqueas Barroso E Familia","group":"Família da noiva","guests":[{"name":"Miqueas Barroso Da Silva","note":"Tio da Noiva"},{"name":"Gizele Bahia","note":"Tia da Noiva"},{"name":"Julie Bahia","note":"Prima"},{"name":"Maria Julia Bahia","note":"Prima"},{"name":"Joao Ricardo Bahia","note":"Primo"}]},{"invite":"Mozaniel Barrozo","group":"Família da noiva","guests":[{"name":"Mozaniel Barrozo Da Silva","note":"Tio da Noiva"},{"name":"Suzana Mendes","note":"Tia da Noiva"},{"name":"Suany Mendes","note":"Prima"}]},{"invite":"Melquias Barroso","group":"Família da noiva","guests":[{"name":"Melquias Barroso","note":"Tio da Noiva"}]},{"invite":"Elcicley Barroso","group":"Família da noiva","guests":[{"name":"Elcicley Barroso","note":"Tia da Noiva"},{"name":"Joniel","note":"Primo"},{"name":"Mikael","note":"Primo"}]},{"invite":"Meirijane E Familia","group":"Família da noiva","guests":[{"name":"Meirijane","note":"Prima da Noiva"},{"name":"Hudson","note":"Primo"}]},{"invite":"Hiel Wisley","group":"Amigos do noivo","guests":[{"name":"Hiel Wisley","note":"Amigo do Noivo"},{"name":"Meire","note":""}]},{"invite":"Carlos Montalvan","group":"Amigos do noivo","guests":[{"name":"Carlos Montalvan","note":"Amigo do Noivo"},{"name":"Juliana","note":""}]},{"invite":"Norma Cativo","group":"Amigos do noivo","guests":[{"name":"Norma Gomes Cativo","note":""},{"name":"Josi","note":""}]},{"invite":"Marcos Jaime","group":"Amigos do noivo","guests":[{"name":"Marcos Jaime","note":""},{"name":"Raphaela","note":""}]},{"invite":"Luis Benayon","group":"Amigos do noivo","guests":[{"name":"Luis Benayon","note":""},{"name":"Maria Fernanda","note":""}]},{"invite":"Gabriela Camelo","group":"Amigos do noivo","guests":[{"name":"Gabriela Camelo","note":""}]},{"invite":"Thiago Brandão","group":"Amigos do noivo","guests":[{"name":"Thiago Brandão","note":"Padrinho"}]},{"invite":"Marilho Andrade","group":"Amigos do noivo","guests":[{"name":"Marilho Andrade","note":""}]},{"invite":"Vitor Angiolis","group":"Amigos do noivo","guests":[{"name":"Vitor Angiolis","note":""},{"name":"Anne","note":""}]},{"invite":"Victor Godinho","group":"Amigos do noivo","guests":[{"name":"Victor Godinho","note":""},{"name":"Karla Gentil","note":""}]},{"invite":"Fernando Neto","group":"Amigos do noivo","guests":[{"name":"Fernando Neto","note":""}]},{"invite":"Rodrigo William","group":"Amigos do noivo","guests":[{"name":"Rodrigo William","note":""}]},{"invite":"Julio Kawakami","group":"Amigos do noivo","guests":[{"name":"Julio Kawakami","note":""}]},{"invite":"Silvan Andrade","group":"Amigos do noivo","guests":[{"name":"Silvan Andrade","note":""},{"name":"Diane","note":""}]},{"invite":"Luis Henrique","group":"Amigos do noivo","guests":[{"name":"Luis Henrique","note":""},{"name":"Brena Anchieta","note":""}]},{"invite":"Hudson Douglas","group":"Amigos do noivo","guests":[{"name":"Hudson Douglas","note":""}]},{"invite":"Mara Valerio","group":"Amigos do noivo","guests":[{"name":"Mara Valerio","note":""},{"name":"Manuela","note":""}]},{"invite":"Ismael","group":"Amigos do noivo","guests":[{"name":"Ismael Goncalves","note":""}]},{"invite":"Rodrigo Marinho","group":"Amigos do noivo","guests":[{"name":"Rodrigo Marinho","note":""},{"name":"Larissa","note":""}]},{"invite":"Eduardo Lima","group":"Amigos do noivo","guests":[{"name":"Eduardo Lima","note":""}]},{"invite":"Joaldo","group":"Amigos do noivo","guests":[{"name":"Joaldo Pedrosa","note":""},{"name":"Maili","note":""}]},{"invite":"Cesar Brandão","group":"Amigos do noivo","guests":[{"name":"Cezar Brandão","note":""}]},{"invite":"Matheus Rocha","group":"Amigos do noivo","guests":[{"name":"Matheus Rocha","note":""}]},{"invite":"Gabriel Venancio","group":"Amigos do noivo","guests":[{"name":"Gabriel Venancio","note":""}]},{"invite":"Matheus Brandão","group":"Amigos do noivo","guests":[{"name":"Matheus Brandão","note":""},{"name":"Fabiana","note":""},{"name":"Juliana","note":""}]},{"invite":"Caio Redig","group":"Amigos do noivo","guests":[{"name":"Caio Redig","note":""},{"name":"Lorena Praia","note":""}]},{"invite":"Jhansen Barbosa","group":"Amigos do noivo","guests":[{"name":"Jhansen Barbosa","note":""},{"name":"Esthephane","note":""}]},{"invite":"Erika Costa","group":"Amigos da noiva","guests":[{"name":"Erika Costa","note":"Amiga da Noiva"},{"name":"Heverton Noronha","note":""},{"name":"Geruza Costa","note":""},{"name":"Erivelton","note":""}]},{"invite":"Keila Mota","group":"Amigos da noiva","guests":[{"name":"Keila Mota","note":"Amiga da Noiva"}]},{"invite":"Haydee Estefani","group":"Amigos da noiva","guests":[{"name":"Haydee Estefani","note":"Amiga da Noiva"}]},{"invite":"Rsiany Albuquerque","group":"Amigos da noiva","guests":[{"name":"Rosiany","note":"Amiga da Noiva"}]},{"invite":"Keylla Oliveira","group":"Amigos da noiva","guests":[{"name":"Keylla Oliveira","note":"Amiga da Noiva"},{"name":"Maria Clara","note":""},{"name":"Mauricio","note":""}]},{"invite":"Nicole","group":"Amigos da noiva","guests":[{"name":"Nicole","note":"Amiga da Noiva"}]},{"invite":"Karen Jhansen","group":"Amigos da noiva","guests":[{"name":"Karen Jhansen","note":"Amiga da Noiva"},{"name":"Helder","note":""}]},{"invite":"Julia Cavalcanti","group":"Amigos da noiva","guests":[{"name":"Julia Cavalcanti","note":"Amiga da Noiva"},{"name":"Matheus Botti","note":""}]},{"invite":"Kennedy Azevedo","group":"Amigos da noiva","guests":[{"name":"Kennedy Azevedo","note":"Amigo da Noiva"}]},{"invite":"Jose Lucas","group":"Amigos da noiva","guests":[{"name":"José Lucas","note":"Amigo da Noiva"}]},{"invite":"Emely Pontes","group":"Amigos da noiva","guests":[{"name":"Emely Pontes","note":"Amiga da Noiva"},{"name":"Acompanhante","note":""}]},{"invite":"Jamille Salazar","group":"Amigos da noiva","guests":[{"name":"Jamille Salazar","note":"Amiga da Noiva"},{"name":"Bruno","note":""}]},{"invite":"Vanessa Aydem","group":"Amigos da noiva","guests":[{"name":"Vanessa Aydem","note":"Amiga da Noiva"},{"name":"Acompanhante","note":""}]}];
+
+let _selectedGuest = null; // { name, invite, group, inviteGuests }
+let _dropdownResults = [];
+
+function normalize(s) {
+  return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+
+function rsvpSearch(val) {
+  const q = normalize(val.trim());
+  const dropdown = document.getElementById('nome-dropdown');
+  const notFound  = document.getElementById('nome-notfound');
+  const confirmed = document.getElementById('nome-confirmed');
+  const step2     = document.getElementById('rsvp-step2');
+  const check     = document.getElementById('nome-check');
+
+  // reset confirmed state when user types again
+  confirmed.classList.add('hidden');
+  step2.classList.add('hidden');
+  check.classList.remove('show');
+  notFound.classList.add('hidden');
+  _selectedGuest = null;
+
+  if (q.length < 2) { dropdown.classList.add('hidden'); return; }
+
+  _dropdownResults = [];
+  for (const inv of RSVP_GUESTS) {
+    for (const g of inv.guests) {
+      if (normalize(g.name).includes(q)) {
+        _dropdownResults.push({ name: g.name, note: g.note, invite: inv.invite, group: inv.group, inviteGuests: inv.guests });
+      }
+    }
+  }
+
+  if (!_dropdownResults.length) {
+    dropdown.classList.add('hidden');
+    if (q.length >= 3) notFound.classList.remove('hidden');
+    return;
+  }
+
+  dropdown.innerHTML = _dropdownResults.slice(0, 8).map((r, i) => `
+    <div class="dropdown-item" onmousedown="selectGuest(${i})">
+      <p class="di-name">${r.name}</p>
+      <p class="di-invite">Convite: ${r.invite}</p>
+    </div>
+  `).join('');
+  dropdown.classList.remove('hidden');
+}
+
+function selectGuest(idx) {
+  const r = _dropdownResults[idx];
+  _selectedGuest = r;
+
+  document.getElementById('nome').value = r.name;
+  document.getElementById('nome-dropdown').classList.add('hidden');
+  document.getElementById('nome-notfound').classList.add('hidden');
+  document.getElementById('nome-check').classList.add('show');
+
+  // Show confirmed banner
+  document.getElementById('cf-name').textContent = r.name;
+  document.getElementById('cf-invite').textContent = `Convite: ${r.invite}`;
+  document.getElementById('nome-confirmed').classList.remove('hidden');
+
+  // Build companion checklist
+  const others = r.inviteGuests.filter(g => g.name !== r.name);
+  const list = document.getElementById('companions-checklist');
+  if (!others.length) {
+    list.innerHTML = '<p class="companion-solo">Você é o único convidado neste convite.</p>';
+  } else {
+    list.innerHTML = others.map(g => `
+      <label class="companion-row">
+        <input type="checkbox" value="${g.name}" checked />
+        <span class="cr-name">${g.name}</span>
+      </label>
+    `).join('');
+  }
+  document.getElementById('rsvp-step2').classList.remove('hidden');
+}
+
+// Hide dropdown on blur
+document.addEventListener('click', e => {
+  if (!e.target.closest('#rsvp-step1')) {
+    document.getElementById('nome-dropdown')?.classList.add('hidden');
+  }
+});
+
+const _supabase = supabase.createClient(
+  'https://grauxogxqvjbvwrfvsp.supabase.co',
+  'sb_publishable_fVYJJmYyD3iM9tE_nKHGQA_E4xv7F6L'
+);
+
+async function submitRSVP() {
+  if (!_selectedGuest) return;
+  const checked = document.querySelectorAll('#companions-checklist input[type=checkbox]:checked');
+  const acompanhantes = Array.from(checked).map(cb => cb.value);
+  const entry = {
+    nome: _selectedGuest.name,
+    invite: _selectedGuest.invite,
+    grupo: _selectedGuest.group,
+    qtd_acompanhantes: acompanhantes.length,
+    acompanhantes: acompanhantes,
+    data: new Date().toLocaleString('pt-BR')
+  };
+
+  const btn = document.querySelector('.btn-submit');
+  if (btn) { btn.disabled = true; btn.textContent = 'Confirmando…'; }
+
+  const { error } = await _supabase.from('rsvp').insert(entry);
+
+  if (error) {
+    console.error(error);
+    if (btn) { btn.disabled = false; btn.textContent = 'Confirmar minha presença'; }
+    alert('Erro ao confirmar. Tente novamente.');
+    return;
+  }
+
+  document.getElementById('rsvp-step1').classList.add('hidden');
+  document.getElementById('rsvp-step2').classList.add('hidden');
+  document.getElementById('rsvp-success').style.display = 'block';
+}
+</script>
+</body>
+</html>
