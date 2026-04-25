@@ -548,8 +548,15 @@ async function loadGuestsData(){
       liveData = data.value;
       localStorage.setItem('mf_guests_v2', JSON.stringify(liveData));
       document.getElementById('setup-notice').style.display='none';
+    } else if(!error && (!data || !data.value)){
+      // table exists but empty — seed with current list
+      await _sb.from('app_config').upsert({key:'guests_data', value:liveData});
+      document.getElementById('setup-notice').style.display='none';
+    } else if(error && (error.code==='PGRST116')){
+      // no row found — seed with current list
+      await _sb.from('app_config').upsert({key:'guests_data', value:liveData});
+      document.getElementById('setup-notice').style.display='none';
     } else if(error && error.code==='42P01'){
-      // table doesn't exist — show setup notice
       document.getElementById('setup-notice').style.display='block';
     }
   }catch(e){
