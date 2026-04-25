@@ -115,8 +115,51 @@ td.date-cell{color:var(--c2);font-size:.72rem;white-space:nowrap}
   #content{margin-left:0;padding:1.5rem 1rem}
   .invite-grid{grid-template-columns:1fr}
   #menu-btn{display:flex}
+  .ge-row{grid-template-columns:1fr auto auto}
+  .ge-row .ge-tag{display:none}
 }
 #menu-btn{display:none;position:fixed;top:1rem;left:1rem;z-index:200;background:var(--c3);border:none;padding:.5rem;border-radius:2px;cursor:pointer;color:white;align-items:center}
+
+/* ── EDIT MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(30,45,65,.52);z-index:600;display:none;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(3px)}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--white);width:100%;max-width:560px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 24px 70px rgba(57,78,106,.3)}
+.modal-header{padding:1.3rem 1.8rem 1rem;border-bottom:1px solid var(--c1);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-header h3{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:400;color:var(--c3)}
+.modal-close{background:none;border:none;cursor:pointer;color:var(--c2);padding:.3rem;display:flex;align-items:center;border-radius:2px;transition:color .15s}
+.modal-close:hover{color:var(--c3)}
+.modal-body{flex:1;overflow-y:auto;padding:1.4rem 1.8rem;display:flex;flex-direction:column;gap:1rem}
+.modal-footer{padding:1rem 1.8rem;border-top:1px solid var(--c1);display:flex;gap:.6rem;justify-content:flex-end;flex-shrink:0;align-items:center}
+.modal-footer-left{margin-right:auto}
+.field-lbl{font-size:.62rem;letter-spacing:.13em;text-transform:uppercase;color:var(--c2);margin-bottom:.35rem;display:block}
+.field-inp{width:100%;padding:.56rem .8rem;border:1px solid var(--c1);font-family:'Inter',sans-serif;font-size:.84rem;color:var(--c3);outline:none;transition:border-color .2s;border-radius:1px}
+.field-inp:focus{border-color:var(--c2)}
+.field-sel{width:100%;padding:.52rem .7rem;border:1px solid var(--c1);font-family:'Inter',sans-serif;font-size:.84rem;color:var(--c3);background:var(--white);outline:none;cursor:pointer;border-radius:1px;transition:border-color .2s}
+.field-sel:focus{border-color:var(--c2)}
+.ge-section-lbl{font-size:.6rem;letter-spacing:.13em;text-transform:uppercase;color:var(--c2);margin-bottom:.4rem;display:block}
+.guests-editor-list{display:flex;flex-direction:column;gap:.35rem}
+.ge-row{display:grid;grid-template-columns:1fr 1fr auto auto;gap:.35rem;align-items:center}
+.ge-row .field-inp{margin:0;font-size:.8rem;padding:.44rem .6rem}
+.ge-row .field-sel{font-size:.76rem;padding:.4rem .4rem}
+.btn-icon-del{width:28px;height:28px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--c1);border-radius:2px;transition:color .15s,background .15s;flex-shrink:0}
+.btn-icon-del:hover{color:var(--red);background:rgba(192,57,43,.07)}
+.btn-add-guest{display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--c2);background:none;border:1px dashed var(--c1);width:100%;padding:.46rem .8rem;cursor:pointer;transition:border-color .2s,color .2s;margin-top:.3rem;font-family:'Inter',sans-serif}
+.btn-add-guest:hover{border-color:var(--c2);color:var(--c3)}
+/* card edit btn */
+.card-edit-btn{position:absolute;top:.75rem;right:.75rem;background:none;border:none;cursor:pointer;color:var(--c1);padding:.3rem;display:flex;align-items:center;border-radius:2px;transition:color .15s,background .15s}
+.card-edit-btn:hover{color:var(--c2);background:var(--c4)}
+.invite-card{position:relative}
+/* sync */
+.sync-pill{font-size:.65rem;padding:.28rem .75rem;border-radius:20px;display:inline-flex;align-items:center;gap:.3rem;transition:all .3s;white-space:nowrap}
+.sync-ok{background:#e8f5e9;color:#2e7d32}
+.sync-err{background:#fdecea;color:#c0392b}
+.sync-ing{background:var(--c4);color:var(--c2)}
+/* new invite btn */
+.btn-new{padding:.46rem 1rem;background:var(--white);color:var(--c3);border:1px solid var(--c1);font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.13em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s;display:flex;align-items:center;gap:.4rem}
+.btn-new:hover{background:var(--c3);color:var(--white);border-color:var(--c3)}
+/* setup notice */
+.setup-notice{background:#fff8e1;border:1px solid #ffe082;padding:.8rem 1rem;font-size:.75rem;color:#7a6000;margin-bottom:1.2rem;display:none;border-radius:2px}
+.setup-notice code{font-size:.7rem;background:rgba(0,0,0,.05);padding:.1rem .35rem;border-radius:2px;display:block;margin-top:.5rem;white-space:pre-wrap;line-height:1.6}
 </style>
 </head>
 <body>
@@ -193,6 +236,13 @@ td.date-cell{color:var(--c2);font-size:.72rem;white-space:nowrap}
         <h2>Lista de Convidados</h2>
         <p>77 convites · 178 pessoas organizadas por grupo</p>
       </div>
+      <div id="setup-notice" class="setup-notice">
+        <strong>⚠ Configuração necessária para sincronização:</strong> Execute o SQL abaixo no painel Supabase (SQL Editor) para que as edições apareçam automaticamente no site dos convidados.<br/>
+        <code>create table if not exists app_config (key text primary key, value jsonb);
+alter table app_config enable row level security;
+create policy "anon_read" on app_config for select using (true);
+create policy "service_all" on app_config for all to service_role using (true) with check (true);</code>
+      </div>
       <div class="toolbar">
         <input class="search-box" type="search" id="guest-search" placeholder="Buscar convidado ou convite…" oninput="filterGuests()"/>
         <div class="filter-btns" id="filter-btns">
@@ -202,6 +252,11 @@ td.date-cell{color:var(--c2);font-size:.72rem;white-space:nowrap}
           <button class="fbtn" onclick="setFilter('Amigos do noivo')">Amigos noivo</button>
           <button class="fbtn" onclick="setFilter('Amigos da noiva')">Amigos noiva</button>
         </div>
+        <button class="btn-new" onclick="openNewInviteModal()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Novo convite
+        </button>
+        <span id="sync-status" class="sync-pill" style="display:none"></span>
       </div>
       <div id="guest-list-container"></div>
     </div>
@@ -224,20 +279,73 @@ td.date-cell{color:var(--c2);font-size:.72rem;white-space:nowrap}
   </main>
 </div>
 
+<!-- EDIT MODAL -->
+<div id="edit-modal" class="modal-overlay" onclick="if(event.target===this)closeEditModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="modal-title">Editar Convite</h3>
+      <button class="modal-close" onclick="closeEditModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <label class="field-lbl">Nome do convite</label>
+        <input class="field-inp" id="edit-invite-name" placeholder="Ex: João Silva E Familia"/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+        <div>
+          <label class="field-lbl">Grupo</label>
+          <select class="field-sel" id="edit-invite-group">
+            <option>Família do noivo</option>
+            <option>Família da noiva</option>
+            <option>Amigos do noivo</option>
+            <option>Amigos da noiva</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-lbl">Telefone (sem +55)</label>
+          <input class="field-inp" id="edit-invite-phone" placeholder="92999999999"/>
+        </div>
+      </div>
+      <div>
+        <span class="ge-section-lbl">Pessoas neste convite</span>
+        <div class="guests-editor-list" id="guests-editor-list"></div>
+        <button class="btn-add-guest" onclick="addEditGuest()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Adicionar pessoa
+        </button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div class="modal-footer-left">
+        <button id="btn-delete-invite" class="btn-action btn-danger" onclick="deleteCurrentInvite()" style="font-size:.62rem;padding:.4rem .9rem;">Excluir convite</button>
+      </div>
+      <button class="btn-action" style="background:transparent;color:var(--c2);border:1px solid var(--c1);" onclick="closeEditModal()">Cancelar</button>
+      <button class="btn-action" onclick="saveEdit()">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ══ DADOS DA PLANILHA ══ */
 const GUESTS_DATA = [{"invite":"Favilla Gentil E Familia","group":"Família do noivo","phone":"92995304811","guests":[{"name":"Favilla Gentil Neto","gender":"M","age":"Idoso","status":"Confirmado","note":"Pai"},{"name":"Julia De Fatima Alves Gentil","gender":"F","age":"Adulto","status":"","note":"Mae"},{"name":"Maria Felipe Alves","gender":"F","age":"Idoso","status":"","note":"Avó"},{"name":"Antonio Monteiro","gender":"M","age":"Idoso","status":"","note":"Tio - Rec Runsen"},{"name":"Elias","gender":"M","age":"Idoso","status":"","note":"Tio - Banquinho"}]},{"invite":"Yago Gentil E Familia","group":"Família do noivo","phone":"92993452767","guests":[{"name":"Yago Felipe Alves Gentil","gender":"M","age":"Adulto","status":"","note":"Irmão - Padrinho"},{"name":"Rayana Cardoso","gender":"F","age":"Adulto","status":"","note":"Madrinha"},{"name":"Bernardo Gentil","gender":"M","age":"Criança","status":"","note":"Afilhado - 4 Anos"}]},{"invite":"Nasser Alves E Familia","group":"Família do noivo","phone":"92991344736","guests":[{"name":"Nasser Felipe","gender":"M","age":"Adulto","status":"","note":"Tio"},{"name":"Aline Felipe","gender":"F","age":"Adulto","status":"","note":"Tia"},{"name":"Lara Felipe","gender":"F","age":"Adulto","status":"","note":"Prima - Madrinha"},{"name":"Simao Nasser","gender":"M","age":"Adulto","status":"","note":"Primo"},{"name":"Kayo","gender":"M","age":"Adulto","status":"","note":"Primo"}]},{"invite":"Benedite Felipe E Familia","group":"Família do noivo","phone":"92984922790","guests":[{"name":"Banedita Felipe","gender":"F","age":"Adulto","status":"","note":"Tia"},{"name":"Beatriz Naarah","gender":"F","age":"Adulto","status":"","note":"Prima"},{"name":"Arom Benamim","gender":"M","age":"Adulto","status":"","note":"Primo"},{"name":"Barbara Safira","gender":"F","age":"Adulto","status":"","note":"Prima"}]},{"invite":"Taumaturgo Coelho E Familia","group":"Família do noivo","phone":"92993263630","guests":[{"name":"Taumaturgo Colheo","gender":"M","age":"Adulto","status":"","note":"Tio"},{"name":"Cristiane Coelho","gender":"F","age":"Adulto","status":"","note":"Tia"},{"name":"Icaro Coelho","gender":"M","age":"Adulto","status":"","note":"Primo"},{"name":"Moises Coelho","gender":"M","age":"Adulto","status":"","note":"Primo"},{"name":"Newton Coleho","gender":"M","age":"Adulto","status":"","note":"Primo"},{"name":"Thais Coelho","gender":"F","age":"Adulto","status":"","note":"Prima"},{"name":"Mariah Coelho","gender":"F","age":"Adulto","status":"","note":"Prima"}]},{"invite":"Maria Socorro E Familia","group":"Família do noivo","phone":"92991539906","guests":[{"name":"Socorro","gender":"F","age":"Adulto","status":"","note":"Tia"},{"name":"Atena","gender":"F","age":"Adulto","status":"","note":"Prima"},{"name":"Myrrana","gender":"F","age":"Adulto","status":"","note":"Prima"},{"name":"Rafael","gender":"M","age":"Adulto","status":"","note":"Primo"},{"name":"Ricardinho","gender":"M","age":"Adulto","status":"","note":"Primo"}]},{"invite":"Paulo E Familia","group":"Família do noivo","phone":"92981350016","guests":[{"name":"Pepita","gender":"F","age":"Adulto","status":"","note":"Tia"},{"name":"Paulo","gender":"M","age":"Adulto","status":"","note":"Tio"}]},{"invite":"Higino E Familia","group":"Família do noivo","phone":"85981196745","guests":[{"name":"Higino Figueiredo","gender":"M","age":"Idoso","status":"","note":"Tio- Higino Pai"},{"name":"Isabel Felipe","gender":"F","age":"Idoso","status":"","note":"Tia"}]},{"invite":"Higino E Familia","group":"Família do noivo","phone":"92981272704","guests":[{"name":"Higino Figueiredo","gender":"M","age":"Adulto","status":"","note":"Primo - Higino Filho"},{"name":"Izis Figueiredo","gender":"F","age":"Adulto","status":"","note":"Prima"},{"name":"Matheus","gender":"M","age":"Criança","status":"","note":"Primo"},{"name":"Joao","gender":"M","age":"Criança de colo","status":"","note":"Primo"}]},{"invite":"Franciney E Familia","group":"Família do noivo","phone":"92993568023","guests":[{"name":"Franciney Oliveira","gender":"M","age":"Adulto","status":"","note":"Primo - Padrinho"},{"name":"Kamilly","gender":"F","age":"Adulto","status":"","note":"Prima"}]},{"invite":"Ana Maura E Familia","group":"Família do noivo","phone":"92991325487","guests":[{"name":"Ana Maura Gentil","gender":"F","age":"Idoso","status":"","note":"Tia"},{"name":"Mariana Gentil","gender":"F","age":"Adulto","status":"","note":"Prima"},{"name":"João Gilberto","gender":"M","age":"Adulto","status":"","note":""}]},{"invite":"Aluizio E Familia","group":"Família do noivo","phone":"91988921364","guests":[{"name":"Aloizio Solyno","gender":"M","age":"Idoso","status":"","note":"Tio"},{"name":"Ionara Solyno","gender":"F","age":"Idoso","status":"","note":"Tia"}]},{"invite":"Thiago E Familia","group":"Família do noivo","phone":"91982490057","guests":[{"name":"Thiago","gender":"M","age":"Adulto","status":"","note":"Primo"},{"name":"Carol","gender":"F","age":"Adulto","status":"","note":"Prima"}]},{"invite":"Cal E Familia","group":"Família do noivo","phone":"91993593936","guests":[{"name":"Cal","gender":"M","age":"Idoso","status":"","note":"Tio"},{"name":"Elem","gender":"F","age":"Idoso","status":"","note":"Tia"},{"name":"Debora","gender":"F","age":"Adulto","status":"","note":"Prima"},{"name":"Danila","gender":"F","age":"Adulto","status":"","note":"Prima"}]},{"invite":"Daniel E Familia","group":"Família do noivo","phone":"91981113941","guests":[{"name":"Daniel Cal","gender":"M","age":"Adulto","status":"","note":"Primo"},{"name":"Karla Cal","gender":"F","age":"Adulto","status":"","note":"Prima"}]},{"invite":"Augusta E Familia","group":"Família do noivo","phone":"92991996113","guests":[{"name":"Augusta","gender":"F","age":"Idoso","status":"","note":"Tia"},{"name":"Bruno","gender":"M","age":"Adulto","status":"","note":"Primo"}]},{"invite":"Davi Cruz E Familia","group":"Família do noivo","phone":"92996042846","guests":[{"name":"Davi Crus","gender":"M","age":"Adulto","status":"","note":"Primo - Padrinho"},{"name":"Karla Gentil","gender":"F","age":"Adulto","status":"","note":"Prima"},{"name":"Elizabeth","gender":"F","age":"Adulto","status":"","note":"Prima"},{"name":"Davizinho","gender":"M","age":"Criança","status":"","note":"Primo - Afilhado"}]},{"invite":"Moises Barroso E Familia","group":"Família da noiva","phone":"92991107022","guests":[{"name":"Moises Barroso Da Silva","gender":"M","age":"Adulto","status":"","note":"Pai Da Noiva"},{"name":"Maria Antonia Duarte De Sousa","gender":"F","age":"Adulto","status":"","note":"Mae Da Noiva"}]},{"invite":"Maria Jose Duarte","group":"Família da noiva","phone":"92992672502","guests":[{"name":"Maria Jose Duarte","gender":"F","age":"Adulto","status":"","note":"Tia Da Noiva"}]},{"invite":"Cristina Duarte E Familia","group":"Família da noiva","phone":"92988042414","guests":[{"name":"Maria Cristina Duarte","gender":"F","age":"Adulto","status":"","note":"Tia Da Noiva"},{"name":"Cristian Duarte","gender":"M","age":"Adulto","status":"","note":"Primo Da Noiva"}]},{"invite":"Vitor Duarte E Familia","group":"Família da noiva","phone":"92985827294","guests":[{"name":"Vitor Hugo Duarte","gender":"M","age":"Adulto","status":"","note":"Primo Da Noiva"},{"name":"Maria Eduarda Vieira","gender":"F","age":"Adulto","status":"","note":"Prima Da Noiva"},{"name":"Bento Duarte - 3 Anos","gender":"M","age":"Criança","status":"","note":"Sobrinho Da Noiva"}]},{"invite":"Jordana Pereira E Familia","group":"Família da noiva","phone":"92999444249","guests":[{"name":"Jordana De Sousa Pereira","gender":"F","age":"Adulto","status":"","note":"Prima Da Noiva"},{"name":"Ygor Mattos","gender":"M","age":"Adulto","status":"","note":"Primo Da Noiva"},{"name":"Luis Otavio Mattos - 3 Anos","gender":"M","age":"Criança","status":"","note":"Sobrinho Da Noiva"},{"name":"Mariza Rodrigues","gender":"F","age":"Adulto","status":"","note":""}]},{"invite":"Hilda Duarte","group":"Família da noiva","phone":"92991155288","guests":[{"name":"Maria Hilda Duarte","gender":"F","age":"Adulto","status":"","note":"Tia Da Noiva"}]},{"invite":"Maria Raimunda E Familia","group":"Família da noiva","phone":"92994506628","guests":[{"name":"Maria Raimunda Duarte","gender":"F","age":"Adulto","status":"","note":"Tia Da Noiva"},{"name":"Miriam Pereira","gender":"F","age":"Adulto","status":"","note":"Prima Da Noiva"}]},{"invite":"Julia Pereira E Familia","group":"Família da noiva","phone":"92995364391","guests":[{"name":"Maria Julia Pereira","gender":"F","age":"Adulto","status":"","note":"Tia Da Noiva"},{"name":"Jose Pereira","gender":"M","age":"Adulto","status":"","note":"Tio Da Noiva"}]},{"invite":"Raimundo Duarte","group":"Família da noiva","phone":"","guests":[{"name":"Robson Pereira","gender":"M","age":"Adulto","status":"","note":"Primo Da Noiva"},{"name":"Kerlyanne","gender":"F","age":"Adulto","status":"","note":"Prima Da Noiva"},{"name":"Heylen Pereira","gender":"F","age":"Adolescente","status":"","note":"Prima Da Noiva"},{"name":"Apolo Pereira","gender":"M","age":"Criança","status":"","note":"Primo Da Noiva"},{"name":"Elise Pereira","gender":"F","age":"Criança","status":"","note":"Prima Da Noiva"}]},{"invite":"Jose Duarte E Familia","group":"Família da noiva","phone":"92992484581","guests":[{"name":"Jose Duarte","gender":"M","age":"Adulto","status":"","note":"Tio Da Noiva"},{"name":"Maria Jucilene De Oliveira","gender":"F","age":"Adulto","status":"","note":"Tia Da Noiva"},{"name":"Guilherme Vinicius Oliveira","gender":"M","age":"Adulto","status":"","note":"Primo Da Noiva"}]},{"invite":"Anselmo Duarte E Familia","group":"Família da noiva","phone":"69992752823","guests":[{"name":"Anselmo Duarte","gender":"M","age":"Adulto","status":"","note":"Tio Da Noiva"},{"name":"Helena Oliveira","gender":"M","age":"Adulto","status":"","note":"Tia Da Noiva"},{"name":"Anderson Oliveira","gender":"M","age":"Adulto","status":"","note":"Primo Da Noiva"},{"name":"Gabriel Oliveira","gender":"M","age":"Adulto","status":"","note":"Primo Da Noiva"},{"name":"Jessica Menezes","gender":"F","age":"Adulto","status":"","note":"Prima Da Noiva"}]},{"invite":"Elieni Araujo E Familia","group":"Família da noiva","phone":"69999000942","guests":[{"name":"Elieni Duarte","gender":"F","age":"Adulto","status":"","note":"Tia Da Noiva"},{"name":"Flavio Dias","gender":"M","age":"Adulto","status":"","note":"Tio Da Noiva"},{"name":"Kele Caroline Araujo","gender":"F","age":"Adulto","status":"","note":"Prima Da Noiva"},{"name":"Rebeca Beatrice Araujo","gender":"F","age":"Adulto","status":"","note":"Prima Da Noiva"}]},{"invite":"Aldelina Rocha E Familia","group":"Família da noiva","phone":"92991053311","guests":[{"name":"Aldelina Rocha","gender":"F","age":"Adulto","status":"","note":"Tia Da Noiva"},{"name":"Anderson Rocha","gender":"M","age":"Adulto","status":"","note":"Primo Da Noiva"}]},{"invite":"Maria De Nazare E Bete","group":"Família da noiva","phone":"92991107022","guests":[{"name":"Maria De Nazare Barroso","gender":"F","age":"Idoso","status":"","note":"Avo Da Noiva"},{"name":"Elizabete Barroso","gender":"F","age":"Adulto","status":"","note":"Prima Da Noiva"}]},{"invite":"Jose Barroso E Familia","group":"Família da noiva","phone":"92988024836","guests":[{"name":"Jose Barroso Da Silva","gender":"M","age":"Adulto","status":"","note":"Tio Da Noiva"},{"name":"Magda Rocha","gender":"F","age":"Adulto","status":"","note":"Tia Da Noiva"},{"name":"Nicole Barroso","gender":"F","age":"Adulto","status":"","note":"Prima Da Noiva"}]},{"invite":"Miqueas Barroso E Familia","group":"Família da noiva","phone":"92991006001","guests":[{"name":"Miqueas Barroso Da Silva","gender":"M","age":"Adulto","status":"","note":"Tio Da Noiva"},{"name":"Gizele Bahia","gender":"F","age":"Adulto","status":"","note":"Tia Da Noiva"},{"name":"Julie Bahia","gender":"F","age":"Adulto","status":"","note":"Prima Da Noiva"},{"name":"Maria Julia Bahia","gender":"F","age":"Adulto","status":"","note":"Prima Da Noiva"},{"name":"Joao Ricardo Bahia","gender":"M","age":"Criança","status":"","note":"Primo Da Noiva"}]},{"invite":"Mozaniel Barrozo","group":"Família da noiva","phone":"92991966873","guests":[{"name":"Mozaniel Barrozo Da Silva","gender":"M","age":"Adulto","status":"","note":"Tio Da Noiva"},{"name":"Suzana Mendes","gender":"F","age":"Adulto","status":"","note":"Tia Da Noiva"},{"name":"Suany Mendes","gender":"F","age":"Adulto","status":"","note":"Prima Da Noiva"}]},{"invite":"Melquias Barroso","group":"Família da noiva","phone":"92995096608","guests":[{"name":"Melquias Barroso","gender":"M","age":"Adulto","status":"","note":"Tio Da Noiva"}]},{"invite":"Elcicley Barroso","group":"Família da noiva","phone":"","guests":[{"name":"Elcicley Barroso","gender":"","age":"","status":"","note":"Tia Da Noiva"},{"name":"Joniel","gender":"","age":"","status":"","note":"Primo Da Noiva"},{"name":"Mikael","gender":"","age":"","status":"","note":"Primo Da Noiva"}]},{"invite":"Meirijane E Familia","group":"Família da noiva","phone":"","guests":[{"name":"Meirijane","gender":"F","age":"Adulto","status":"","note":"Prima Da Noiva"},{"name":"Hudson","gender":"M","age":"Adulto","status":"","note":"Primo Da Noiva"}]},{"invite":"Hiel Wisley","group":"Amigos do noivo","phone":"92984412294","guests":[{"name":"Hiel Wisley","gender":"M","age":"Adulto","status":"","note":"Amigo Do Noivo"},{"name":"Meire","gender":"F","age":"Adulto","status":"","note":"Amiga Da Noiva"}]},{"invite":"Carlos Montalvan","group":"Amigos do noivo","phone":"92991362590","guests":[{"name":"Carlos Montalvan","gender":"M","age":"Adulto","status":"","note":"Caranhas"},{"name":"Juliana","gender":"F","age":"Adulto","status":"","note":"Esposa Carlos"}]},{"invite":"Norma Cativo","group":"Amigos do noivo","phone":"92984229802","guests":[{"name":"Norma Gomes Cativo","gender":"M","age":"Adulto","status":"","note":""},{"name":"Josi","gender":"F","age":"Adulto","status":"","note":"Esposa - Norma"}]},{"invite":"Marcos Jaime","group":"Amigos do noivo","phone":"92992509701","guests":[{"name":"Marcos Jaime","gender":"M","age":"Adulto","status":"","note":""},{"name":"Raphaela","gender":"F","age":"Adulto","status":"","note":"Esposa Marcos Jaime"}]},{"invite":"Luis Benayon","group":"Amigos do noivo","phone":"92992228558","guests":[{"name":"Luis Benayon","gender":"M","age":"Adulto","status":"","note":""},{"name":"Maria Fernanda","gender":"F","age":"Adulto","status":"","note":"Esposa Luis"}]},{"invite":"Gabriela Camelo","group":"Amigos do noivo","phone":"92992274308","guests":[{"name":"Gabriela Camelo","gender":"F","age":"Adulto","status":"","note":""}]},{"invite":"Thiago Brandão","group":"Amigos do noivo","phone":"92984814918","guests":[{"name":"Thiago Brandão","gender":"M","age":"Adulto","status":"","note":"Padrinho"}]},{"invite":"Marilho Andrade","group":"Amigos do noivo","phone":"92981682409","guests":[{"name":"Marilho Andrade","gender":"M","age":"Adulto","status":"","note":""}]},{"invite":"Vitor Angiolis","group":"Amigos do noivo","phone":"92991433073","guests":[{"name":"Vitor Angiolis","gender":"M","age":"Adulto","status":"","note":""},{"name":"Anne","gender":"F","age":"Adulto","status":"","note":"Esposa Vitor Angiolis"}]},{"invite":"Victor Godinho","group":"Amigos do noivo","phone":"92991795657","guests":[{"name":"Victor Godinho","gender":"M","age":"Adulto","status":"","note":""},{"name":"Karla Gentil","gender":"F","age":"Adulto","status":"","note":"Esposa Victor Godinho"}]},{"invite":"Fernando Neto","group":"Amigos do noivo","phone":"92993033965","guests":[{"name":"Fernando Neto","gender":"M","age":"Adulto","status":"","note":""}]},{"invite":"Rodrigo William","group":"Amigos do noivo","phone":"92994523042","guests":[{"name":"Rodrigo William","gender":"M","age":"Adulto","status":"","note":""}]},{"invite":"Julio Kawakami","group":"Amigos do noivo","phone":"92993518362","guests":[{"name":"Julio Kawakami","gender":"M","age":"Adulto","status":"","note":""}]},{"invite":"Silvan Andrade","group":"Amigos do noivo","phone":"92992556673","guests":[{"name":"Silvan Andrade","gender":"M","age":"Adulto","status":"","note":""},{"name":"Diane","gender":"F","age":"Adulto","status":"","note":"Esposa Do Silvan"}]},{"invite":"Luis Henrique","group":"Amigos do noivo","phone":"92984331963","guests":[{"name":"Luis Henrique","gender":"M","age":"Adulto","status":"","note":"Lh"},{"name":"Brena Anchieta","gender":"F","age":"Adulto","status":"","note":"Esposa Do Lh"}]},{"invite":"Hudson Douglas","group":"Amigos do noivo","phone":"92991312397","guests":[{"name":"Hudson Douglas","gender":"M","age":"Adulto","status":"","note":""}]},{"invite":"Mara Valerio","group":"Amigos do noivo","phone":"92992521906","guests":[{"name":"Mara Valerio","gender":"M","age":"Adulto","status":"","note":"Mara"},{"name":"Manuela","gender":"F","age":"Adulto","status":"","note":"Esposa Do Mara"}]},{"invite":"Ismael","group":"Amigos do noivo","phone":"92981129448","guests":[{"name":"Ismael Goncalves","gender":"M","age":"Adulto","status":"","note":""}]},{"invite":"Rodrigo Marinho","group":"Amigos do noivo","phone":"92999659656","guests":[{"name":"Rodrigo Marinho","gender":"M","age":"Adulto","status":"","note":""},{"name":"Larissa","gender":"F","age":"Adulto","status":"","note":"Esposa Do Rodrigo"}]},{"invite":"Eduardo Lima","group":"Amigos do noivo","phone":"92993232250","guests":[{"name":"Eduardo Lima","gender":"M","age":"Adulto","status":"","note":""}]},{"invite":"Joaldo","group":"Amigos do noivo","phone":"92982716076","guests":[{"name":"Joaldo Pedrosa","gender":"M","age":"Adulto","status":"","note":""},{"name":"Maili","gender":"F","age":"Adulto","status":"","note":"Esposa Do Joaldo"}]},{"invite":"Cesar Brandão","group":"Amigos do noivo","phone":"92999843705","guests":[{"name":"Cezar Brandão","gender":"M","age":"Adulto","status":"","note":"Catega"}]},{"invite":"Matheus Rocha","group":"Amigos do noivo","phone":"92984154786","guests":[{"name":"Matheus Rocha","gender":"M","age":"Adulto","status":"","note":"Guedes"}]},{"invite":"Gabriel Venancio","group":"Amigos do noivo","phone":"92982125003","guests":[{"name":"Gabriel Venancio","gender":"M","age":"Adulto","status":"","note":"Biel"}]},{"invite":"Matheus Brandão","group":"Amigos do noivo","phone":"92981084170","guests":[{"name":"Matheus Brandão","gender":"M","age":"Adulto","status":"","note":"Cabeção"},{"name":"Fabiana","gender":"F","age":"Adulto","status":"","note":"Esposa Cabeção"},{"name":"Juliana","gender":"F","age":"Adulto","status":"","note":"Irma Do Cabeção"}]},{"invite":"Caio Redig","group":"Amigos do noivo","phone":"92981152707","guests":[{"name":"Caio Redig","gender":"M","age":"Adulto","status":"","note":"Amigo Do Noivo"},{"name":"Lorena Praia","gender":"F","age":"Adulto","status":"","note":"Esposa Do Caio"}]},{"invite":"Jhansen Barbosa","group":"Amigos do noivo","phone":"92992065177","guests":[{"name":"Jhansen Barbosa","gender":"M","age":"Adulto","status":"","note":"Amigo Do Noivo"},{"name":"Esthephane","gender":"F","age":"Adulto","status":"","note":"Esposa Do Jhansen"}]},{"invite":"Erika Costa","group":"Amigos da noiva","phone":"92991342525","guests":[{"name":"Erika Costa","gender":"F","age":"Adulto","status":"","note":"Amiga Da Noiva"},{"name":"Heverton Noronha","gender":"M","age":"Adulto","status":"","note":"Amigo Da Noiva"},{"name":"Geruza Costa","gender":"F","age":"Adulto","status":"","note":"Amiga Da Noiva"},{"name":"Erivelton","gender":"M","age":"Adulto","status":"","note":"Amigo Da Noiva"}]},{"invite":"Keila Mota","group":"Amigos da noiva","phone":"97984057528","guests":[{"name":"Keila Mota","gender":"F","age":"Adulto","status":"","note":"Amiga Da Noiva"}]},{"invite":"Haydee Estefani","group":"Amigos da noiva","phone":"92981745721","guests":[{"name":"Haydee Estefani","gender":"F","age":"Adulto","status":"","note":"Amiga Da Noiva"}]},{"invite":"Rsiany Albuquerque","group":"Amigos da noiva","phone":"","guests":[{"name":"Rosiany","gender":"F","age":"Adulto","status":"","note":"Amiga Da Noiva"}]},{"invite":"Keylla Oliveira","group":"Amigos da noiva","phone":"92988395913","guests":[{"name":"Keylla Oliveira","gender":"F","age":"Adulto","status":"","note":"Amiga Da Noiva"},{"name":"Maria Clara","gender":"F","age":"Criança","status":"","note":"Amiga Da Noiva"},{"name":"Mauricio","gender":"M","age":"Adulto","status":"","note":"Amigo Da Noiva"}]},{"invite":"Nicole","group":"Amigos da noiva","phone":"92991479659","guests":[{"name":"Nicole","gender":"F","age":"Adulto","status":"","note":"Amiga Da Noiva"}]},{"invite":"Karen Jhansen","group":"Amigos da noiva","phone":"92995369318","guests":[{"name":"Karen Jhansen","gender":"F","age":"Adulto","status":"","note":"Amiga Da Noiva"},{"name":"Helder","gender":"M","age":"Adulto","status":"","note":"Amigo Da Noiva"}]},{"invite":"Julia Cavalcanti","group":"Amigos da noiva","phone":"92985970677","guests":[{"name":"Julia Cavalcanti","gender":"F","age":"Adulto","status":"","note":"Amiga Da Noiva"},{"name":"Matheus Botti","gender":"M","age":"Adulto","status":"","note":"Amigo Da Noiva"}]},{"invite":"Kennedy Azevedo","group":"Amigos da noiva","phone":"92984536286","guests":[{"name":"Kennedy Azevedo","gender":"M","age":"Adulto","status":"","note":"Amigo Da Noiva"}]},{"invite":"Jose Lucas","group":"Amigos da noiva","phone":"92992194632","guests":[{"name":"José Lucas","gender":"M","age":"Adulto","status":"","note":"Amigo Da Noiva"}]},{"invite":"Emely Pontes","group":"Amigos da noiva","phone":"92993347358","guests":[{"name":"Emely Pontes","gender":"F","age":"Adulto","status":"","note":"Amiga Da Noiva"},{"name":"Acompanhante","gender":"M","age":"Adulto","status":"","note":"Amigo Da Noiva"}]},{"invite":"Jamille Salazar","group":"Amigos da noiva","phone":"92982454646","guests":[{"name":"Jamille Salazar","gender":"F","age":"Adulto","status":"","note":"Amiga Da Noiva"},{"name":"Bruno","gender":"M","age":"Adulto","status":"","note":"Amigo Da Noiva"}]},{"invite":"Vanessa Aydem","group":"Amigos da noiva","phone":"92985623422","guests":[{"name":"Vanessa Aydem","gender":"F","age":"Adulto","status":"","note":"Amiga Da Noiva"},{"name":"Acompanhante","gender":"M","age":"Adulto","status":"","note":""}]}];
 
 const SENHA = 'mf2026';
 let activeFilter = 'Todos';
+let liveData = JSON.parse(JSON.stringify(GUESTS_DATA)); // working copy — synced with Supabase
+let _editGuests = []; // guests buffer while modal is open
+let _editIdx = null;  // index in liveData being edited
+let _isNewInvite = false;
 
 /* ── AUTH ── */
-function doLogin(e){
+async function doLogin(e){
   e.preventDefault();
   if(document.getElementById('pwd').value === SENHA){
     document.getElementById('login').style.display='none';
     document.getElementById('app').style.display='block';
-    updateDash(); renderGuests(); renderRSVP();
+    await loadGuestsData(); // loads + renders guests
+    updateDash(); renderRSVP();
   } else {
     document.getElementById('login-err').style.display='block';
   }
@@ -283,7 +391,9 @@ function renderGuests(){
   const container = document.getElementById('guest-list-container');
   const groupOrder = ['Família do noivo','Família da noiva','Amigos do noivo','Amigos da noiva'];
 
-  let data = GUESTS_DATA;
+  // Tag liveData items with original index before filtering
+  const dataWithIdx = liveData.map((inv,i)=>({...inv,_origIdx:i}));
+  let data = dataWithIdx;
   if(activeFilter !== 'Todos') data = data.filter(inv=>inv.group===activeFilter);
   if(q) data = data.filter(inv=>
     inv.invite.toLowerCase().includes(q) ||
@@ -294,6 +404,12 @@ function renderGuests(){
   groupOrder.forEach(g=>grouped[g]=[]);
   data.forEach(inv=>{ if(grouped[inv.group]) grouped[inv.group].push(inv); });
 
+  // Update header subtitle dynamically
+  const totalInvites = liveData.length;
+  const totalPeople = liveData.reduce((a,i)=>a+i.guests.length,0);
+  const hdr = document.querySelector('#page-guests .page-header p');
+  if(hdr) hdr.textContent = `${totalInvites} convites · ${totalPeople} pessoas organizadas por grupo`;
+
   let html = '';
   for(const gname of groupOrder){
     const invs = grouped[gname];
@@ -303,8 +419,12 @@ function renderGuests(){
       <h3 class="group-title">${esc(gname)} <span class="group-badge">${invs.length} convites · ${total} pessoas</span></h3>
       <div class="invite-grid">`;
     for(const inv of invs){
+      const idx = inv._origIdx;
       const phoneLink = inv.phone ? `<a href="tel:+55${inv.phone}" style="color:inherit;text-decoration:none;">+55 ${inv.phone}</a>` : '—';
       html += `<div class="invite-card">
+        <button class="card-edit-btn" onclick="openEditModal(${idx})" title="Editar convite">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
         <p class="invite-name">${esc(inv.invite)}</p>
         ${inv.phone ? `<p class="invite-phone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 015.13 15.9a19.79 19.79 0 01-3.07-8.63 2 2 0 011.99-2.18h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>${phoneLink}</p>` : ''}
         <ul class="guest-list">`;
@@ -414,6 +534,145 @@ async function clearRSVP(){
   const { error } = await _sb.from('rsvp').delete().neq('id', '00000000-0000-0000-0000-000000000000');
   if(error){ alert('Erro ao apagar.'); console.error(error); return; }
   renderRSVP(); updateDash();
+}
+
+/* ══ GUEST LIST CLOUD SYNC ══ */
+async function loadGuestsData(){
+  // 1. localStorage (instant fallback)
+  const local = localStorage.getItem('mf_guests_v2');
+  if(local){ try{ liveData = JSON.parse(local); }catch(e){} }
+  // 2. Supabase app_config (authoritative)
+  try{
+    const {data,error} = await _sb.from('app_config').select('value').eq('key','guests_data').single();
+    if(!error && data?.value && Array.isArray(data.value)){
+      liveData = data.value;
+      localStorage.setItem('mf_guests_v2', JSON.stringify(liveData));
+      document.getElementById('setup-notice').style.display='none';
+    } else if(error && error.code==='42P01'){
+      // table doesn't exist — show setup notice
+      document.getElementById('setup-notice').style.display='block';
+    }
+  }catch(e){
+    document.getElementById('setup-notice').style.display='block';
+  }
+  renderGuests();
+}
+
+async function saveGuestsData(){
+  localStorage.setItem('mf_guests_v2', JSON.stringify(liveData));
+  setSyncStatus('ing');
+  try{
+    const {error} = await _sb.from('app_config').upsert({key:'guests_data', value:liveData});
+    if(error) throw error;
+    setSyncStatus('ok');
+  }catch(e){
+    setSyncStatus('err');
+    console.error('saveGuestsData:', e);
+  }
+}
+
+function setSyncStatus(s){
+  const el = document.getElementById('sync-status');
+  if(!el) return;
+  el.style.display = 'inline-flex';
+  el.className = 'sync-pill sync-'+s;
+  el.textContent = s==='ok' ? '✓ Salvo' : s==='ing' ? '⟳ Salvando…' : '⚠ Erro ao salvar';
+  if(s==='ok') setTimeout(()=>{ el.style.display='none'; }, 3000);
+}
+
+/* ══ EDIT MODAL ══ */
+function openEditModal(idx){
+  _editIdx = idx;
+  _isNewInvite = false;
+  const inv = liveData[idx];
+  document.getElementById('modal-title').textContent = 'Editar Convite';
+  document.getElementById('edit-invite-name').value = inv.invite;
+  document.getElementById('edit-invite-group').value = inv.group;
+  document.getElementById('edit-invite-phone').value = inv.phone||'';
+  document.getElementById('btn-delete-invite').style.display = '';
+  _editGuests = JSON.parse(JSON.stringify(inv.guests));
+  renderGuestEditors();
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function openNewInviteModal(){
+  _isNewInvite = true;
+  _editIdx = null;
+  document.getElementById('modal-title').textContent = 'Novo Convite';
+  document.getElementById('edit-invite-name').value = '';
+  document.getElementById('edit-invite-group').value = 'Família do noivo';
+  document.getElementById('edit-invite-phone').value = '';
+  document.getElementById('btn-delete-invite').style.display = 'none';
+  _editGuests = [];
+  renderGuestEditors();
+  document.getElementById('edit-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('edit-invite-name').focus(), 80);
+}
+
+function closeEditModal(){
+  document.getElementById('edit-modal').classList.remove('open');
+  _editIdx = null;
+}
+
+function renderGuestEditors(){
+  const container = document.getElementById('guests-editor-list');
+  container.innerHTML = '';
+  const ages = ['Adulto','Idoso','Adolescente','Criança','Criança de colo'];
+  _editGuests.forEach((g,i)=>{
+    const row = document.createElement('div');
+    row.className = 'ge-row';
+    row.innerHTML = `
+      <input class="field-inp" placeholder="Nome completo" value="${esc(g.name)}" oninput="_editGuests[${i}].name=this.value"/>
+      <input class="field-inp ge-tag" placeholder="Tag (Tio, Prima, Padrinho…)" value="${esc(g.note||'')}" oninput="_editGuests[${i}].note=this.value"/>
+      <select class="field-sel" onchange="_editGuests[${i}].age=this.value">
+        ${ages.map(a=>`<option${(g.age||'Adulto')===a?' selected':''}>${a}</option>`).join('')}
+      </select>
+      <button class="btn-icon-del" onclick="removeEditGuest(${i})" title="Remover">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      </button>`;
+    container.appendChild(row);
+  });
+}
+
+function addEditGuest(){
+  _editGuests.push({name:'', note:'', age:'Adulto', gender:'', status:''});
+  renderGuestEditors();
+  setTimeout(()=>{
+    const rows = document.querySelectorAll('#guests-editor-list .ge-row');
+    if(rows.length){ const inp = rows[rows.length-1].querySelector('input'); if(inp) inp.focus(); }
+  }, 50);
+}
+
+function removeEditGuest(i){
+  _editGuests.splice(i, 1);
+  renderGuestEditors();
+}
+
+async function saveEdit(){
+  const name = document.getElementById('edit-invite-name').value.trim();
+  if(!name){ document.getElementById('edit-invite-name').focus(); return; }
+  const inv = {
+    invite: name,
+    group:  document.getElementById('edit-invite-group').value,
+    phone:  document.getElementById('edit-invite-phone').value.trim(),
+    guests: _editGuests.filter(g=>g.name.trim())
+  };
+  if(_isNewInvite){
+    liveData.push(inv);
+  } else {
+    liveData[_editIdx] = { ...liveData[_editIdx], ...inv };
+  }
+  closeEditModal();
+  renderGuests();
+  await saveGuestsData();
+}
+
+async function deleteCurrentInvite(){
+  if(!confirm(`Excluir o convite "${liveData[_editIdx]?.invite}" e todas as pessoas nele? Esta ação não pode ser desfeita.`)) return;
+  liveData.splice(_editIdx, 1);
+  closeEditModal();
+  renderGuests();
+  await saveGuestsData();
 }
 </script>
 </body>
